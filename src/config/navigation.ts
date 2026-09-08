@@ -22,7 +22,7 @@ export interface NavLink {
 
 /** Header links, in the order the client asked for. */
 export const primaryNav: readonly NavLink[] = [
-  { label: 'Leistungen', href: '/leistungen' },
+  { label: 'Leistungen', href: '/#leistungen' },
   { label: 'Ablauf', href: '/#ablauf' },
   { label: 'Über uns', href: '/ueber-uns' },
   { label: 'Kontakt', href: '/kontakt' },
