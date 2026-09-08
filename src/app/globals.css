@@ -1,0 +1,322 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Imperial design tokens.
+
+   Light only — the brand is bright, no dark mode in v1.
+   `@theme static` emits every token even when no utility references it yet,
+   so the whole system stays inspectable from the styleguide and usable from
+   plain CSS.
+   ========================================================================== */
+
+@theme static {
+  /* --- Color -------------------------------------------------------------
+     Accent blue (brand-300) stays sparse: CTA hover, active states, icon
+     details. Never as a filled surface.
+     Measured contrast on --color-paper: ink 17.0:1, neutral-700 8.3:1,
+     brand-900 7.9:1, brand-700 5.6:1, neutral-500 5.0:1.
+     brand-500 is 3.9:1 and brand-300 2.3:1 — non-text only (focus ring, icon
+     details); neutral-400 is 3.2:1 — decorative and large text only, never
+     body copy. */
+  --color-brand-900: #14547e;
+  --color-brand-700: #1c6b9c;
+  --color-brand-500: #2e86c1;
+  --color-brand-300: #45b3e7;
+  --color-brand-050: #eaf4fa;
+
+  --color-neutral-700: #4a4d50;
+  --color-neutral-500: #6a6e72; /* derived: smallest AA-safe muted text */
+  --color-neutral-400: #8a8f94;
+
+  --color-paper: #fbfcfd;
+  --color-ink: #0f1b24;
+
+  /* The one non-brand hue on the site, and it exists only to mark a form
+     error. Never decorative, never a surface on its own: an error is always
+     icon + text as well, so the colour is never the sole carrier of meaning.
+     danger-700 measures 7.17:1 on --color-paper and 6.50:1 on danger-050 —
+     AA at every size, AAA for body copy on paper. */
+  --color-danger-700: #9c2f27;
+  --color-danger-050: #fbeeeb;
+
+  /* --- Type --------------------------------------------------------------
+     One family. Hierarchy is carried by weight and tracking, not by a second
+     typeface. Geist — client-confirmed 08.09.2026, self-hosted via next/font. */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Display sizes are fluid; body sizes are fixed so line length stays
+     predictable across breakpoints. Optical tracking tightens as size grows. */
+  --text-display: clamp(3rem, 1.55rem + 6.05vw, 6rem);
+  --text-display--line-height: 0.94;
+  --text-display--letter-spacing: -0.035em;
+  --text-display--font-weight: 500;
+
+  --text-title-xl: clamp(2.375rem, 1.6rem + 3.25vw, 4rem);
+  --text-title-xl--line-height: 1;
+  --text-title-xl--letter-spacing: -0.03em;
+  --text-title-xl--font-weight: 500;
+
+  --text-title-lg: clamp(1.875rem, 1.4rem + 2vw, 2.875rem);
+  --text-title-lg--line-height: 1.06;
+  --text-title-lg--letter-spacing: -0.025em;
+  --text-title-lg--font-weight: 500;
+
+  --text-title-md: clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem);
+  --text-title-md--line-height: 1.2;
+  --text-title-md--letter-spacing: -0.018em;
+  --text-title-md--font-weight: 500;
+
+  --text-title-sm: 1.125rem;
+  --text-title-sm--line-height: 1.35;
+  --text-title-sm--letter-spacing: -0.012em;
+  --text-title-sm--font-weight: 500;
+
+  --text-lead: clamp(1.125rem, 1.03rem + 0.4vw, 1.3125rem);
+  --text-lead--line-height: 1.55;
+  --text-lead--letter-spacing: -0.011em;
+  --text-lead--font-weight: 400;
+
+  --text-body: 1.0625rem; /* 17px — the reading size */
+  --text-body--line-height: 1.65;
+  --text-body--letter-spacing: -0.006em;
+
+  --text-body-sm: 0.9375rem;
+  --text-body-sm--line-height: 1.6;
+  --text-body-sm--letter-spacing: -0.003em;
+
+  --text-micro: 0.8125rem;
+  --text-micro--line-height: 1.45;
+  --text-micro--letter-spacing: 0;
+
+  --text-eyebrow: 0.625rem; /* 10px, per CLAUDE.md 5.8 */
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.2em;
+  --text-eyebrow--font-weight: 500;
+
+  /* --- Spacing -----------------------------------------------------------
+     Macro whitespace. `py-section` = py-24, `py-section-xl` = py-40. Named so
+     section rhythm is a decision, not an ad-hoc number per file. */
+  --spacing-section: 6rem; /* 96px  */
+  --spacing-section-md: 7.5rem; /* 120px */
+  --spacing-section-lg: 9rem; /* 144px */
+  --spacing-section-xl: 10rem; /* 160px */
+  --spacing-gutter: 1.5rem;
+  --spacing-gutter-lg: 2.5rem;
+
+  --container-shell: 78rem; /* max-w-shell — outer page width */
+  --container-copy: 40rem; /* max-w-copy — ~72ch at --text-body */
+  /* max-w-legal — the running-text measure for the long-form legal pages.
+     ~67ch at --text-body, i.e. deliberately below the 70-character ceiling
+     those pages are set to. Narrower than --container-copy because those are
+     read start to finish, not scanned in a card. */
+  --container-legal: 37.5rem;
+
+  /* --- Radius ------------------------------------------------------------
+     Squircle family. Every bezel core radius is computed concentrically from
+     its shell: core = shell - inset. See .imp-bezel below. */
+  --radius-bezel-sm: 1.25rem;
+  --radius-bezel-md: 2rem;
+  --radius-bezel-lg: 2.5rem;
+  --radius-bezel-xl: 3rem;
+  --radius-pill: 9999px;
+
+  /* --- Shadow ------------------------------------------------------------
+     Ambient only: wide, low-alpha, ink-tinted. No shadow-md, no hard dark
+     drops. Hairlines are inset rings in ink/brand, never a 1px grey border. */
+  --shadow-ambient-xs:
+    0 1px 3px -1px rgb(15 27 36 / 0.04), 0 3px 10px -4px rgb(15 27 36 / 0.05);
+  --shadow-ambient-sm:
+    0 2px 6px -3px rgb(15 27 36 / 0.04), 0 8px 24px -10px rgb(15 27 36 / 0.06);
+  --shadow-ambient-md:
+    0 3px 10px -5px rgb(15 27 36 / 0.04), 0 16px 44px -18px rgb(15 27 36 / 0.07),
+    0 40px 90px -50px rgb(15 27 36 / 0.08);
+  --shadow-ambient-lg:
+    0 4px 14px -8px rgb(15 27 36 / 0.04), 0 26px 70px -26px rgb(15 27 36 / 0.08),
+    0 70px 150px -70px rgb(15 27 36 / 0.1);
+  --shadow-ambient-xl:
+    0 6px 20px -12px rgb(15 27 36 / 0.04),
+    0 40px 100px -34px rgb(15 27 36 / 0.09),
+    0 110px 220px -90px rgb(15 27 36 / 0.12);
+  --shadow-ambient-brand:
+    0 18px 50px -20px rgb(20 84 126 / 0.28),
+    0 44px 96px -52px rgb(20 84 126 / 0.24);
+
+  --shadow-hairline: inset 0 0 0 1px rgb(15 27 36 / 0.06);
+  --shadow-hairline-brand: inset 0 0 0 1px rgb(20 84 126 / 0.12);
+  /* Top light edge — reads as a physical bevel on the bezel core. */
+  --shadow-bevel: inset 0 1px 0 0 rgb(255 255 255 / 0.9);
+
+  /* --- Motion ------------------------------------------------------------
+     Two curves only. Never linear or ease-in-out. */
+  --ease-imperial: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-imperial-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Instance-level variables. Kept outside @theme because they are set per
+   element (inline style / component class), not turned into utilities. */
+:root {
+  /* Three tiers, mirrored in lib/motion.ts for the Motion components.
+     `swift` is the hover tier and the ONLY duration a pointer interaction may
+     use — colour, shadow and the card lift all move together under one pointer
+     event, so nothing inside a card finishes before the rest of it.
+     `base` is a state the user changed; `slow` is an orchestrated arrival. */
+  --duration-swift: 200ms; /* hover, focus, colour — pointer feedback */
+  --duration-base: 420ms; /* a state the user toggled */
+  --duration-slow: 760ms; /* orchestrated arrivals, scroll reveals */
+
+  --bezel-inset-sm: 0.25rem;
+  --bezel-inset-md: 0.375rem;
+  --bezel-inset-lg: 0.5rem;
+
+  /* Defaults consumed by .imp-bezel; <Bezel> overrides them inline. */
+  --bezel-radius: var(--radius-bezel-md);
+  --bezel-inset: var(--bezel-inset-md);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* Clears the floating header pill, so an anchored section does not land
+       underneath it. */
+    scroll-padding-top: 7rem;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-neutral-700);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Figures line up in tables, price rows and the Kennzahlen band. */
+  table,
+  time,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-050);
+    color: var(--color-brand-900);
+  }
+
+  /* Focus is designed, never removed. Follows the element's own radius. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 3px;
+  }
+
+  /* Global motion reset. Every spring, reveal and transition is neutralised —
+     components additionally branch on useReducedMotion() so no layout depends
+     on an animation that never runs. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      /* Not just cosmetic. `.imp-enter` fills backwards during its delay, so
+         without this a staggered element would sit at opacity 0 for the full
+         delay and only then snap in — a reduced-motion user would watch the
+         hero appear in steps, which is the effect they asked not to see. */
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Double bezel: outer shell + inner core, radii concentric by construction.
+     The core radius is derived, so shell radius and inset can be changed
+     independently without the corners going out of true. */
+  .imp-bezel {
+    border-radius: var(--bezel-radius);
+    padding: var(--bezel-inset);
+  }
+
+  .imp-bezel-core {
+    border-radius: calc(var(--bezel-radius) - var(--bezel-inset));
+    height: 100%;
+  }
+}
+
+@layer components {
+  /* --- Above-the-fold entrance -------------------------------------------
+     The first screen is animated in CSS, not in Motion, and the difference is
+     not stylistic.
+
+     <Reveal> is a client component whose `initial` state is serialised into the
+     SSR markup, so the HTML ships with `opacity: 0` and stays that way until
+     React has hydrated AND an IntersectionObserver has fired. For content below
+     the fold that is invisible — the reader has not scrolled there yet. For the
+     hero it meant the headline, the subline and the CTA were blank for the
+     whole of hydration: the largest contentful paint could not be recorded
+     until the JS bundle had executed, and on a cold 4G connection the visitor
+     read a white page first.
+
+     A CSS animation has none of that in its path. It starts at the first paint,
+     with no JavaScript, and if the bundle never arrives at all the content
+     still ends up visible. Only transform and opacity move. */
+  @keyframes imp-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--enter-distance, 0.75rem), 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .imp-enter {
+    animation: imp-rise var(--duration-base) var(--ease-imperial) both;
+    animation-delay: var(--enter-delay, 0ms);
+  }
+
+  /* Opt-in hover lift for <Bezel interactive>. Written as a rule rather than
+     `hover:-translate-y-1 motion-reduce:hover:translate-y-0` so the
+     reduced-motion override wins by cascade order instead of by whichever
+     variant Tailwind happens to emit last. */
+  /* Swift + soft, i.e. exactly what every colour hover on the site uses. The
+     lift used to run at --duration-base on the harder curve, so hovering a card
+     moved its shadow and its link colour on two different clocks — the lift was
+     still settling 220ms after the text had finished. */
+  .imp-lift {
+    transition: transform var(--duration-swift) var(--ease-imperial-soft);
+  }
+
+  .imp-lift:hover {
+    transform: translate3d(0, -4px, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .imp-lift:hover {
+      transform: none;
+    }
+  }
+}
