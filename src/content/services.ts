@@ -55,6 +55,33 @@ export interface ServiceItem {
   readonly name: string;
 }
 
+/**
+ * The category photograph.
+ *
+ * Lives here rather than next to the markup, unlike the icons and the tile
+ * sizes: those are decisions about the layout, this is a decision about the
+ * content. The bento, `/leistungen` and any later surface that shows a
+ * category all want the same picture of it, and `alt` is copy the client
+ * reviews alongside the blurb.
+ *
+ * `position` travels with the image for the same reason. It is not a layout
+ * value but a property of the photograph: it says where in the frame the
+ * subject actually sits, so that a crop taken by a narrow tile keeps the boot
+ * or the squeegee instead of cutting it off. Each photograph is used by
+ * exactly one tile, so one value per image is unambiguous.
+ */
+export interface ServiceImage {
+  /** Path under `public/`. ASCII only, so no path ever needs escaping. */
+  readonly src: string;
+  /**
+   * German, descriptive, no keyword stacking. Describes what is in the frame,
+   * not which service we would like to rank for.
+   */
+  readonly alt: string;
+  /** `object-position` value. See the note above on why it belongs here. */
+  readonly position: string;
+}
+
 export interface ServiceCategory {
   readonly slug: ServiceCategorySlug;
   /** Full name: bento tile title, form group label, JSON-LD `Service` name. */
@@ -68,6 +95,7 @@ export interface ServiceCategory {
    * No feature list — the feature list is `items`, directly underneath.
    */
   readonly blurb: string;
+  readonly image: ServiceImage;
   readonly items: readonly ServiceItem[];
 }
 
@@ -85,6 +113,13 @@ export const serviceCategories = [
     anchor: 'gebaeudereinigung',
     blurb:
       'Ihre Objekte bleiben dauerhaft vorzeigbar, ohne dass Sie hinterhertelefonieren müssen. Ein festes Team übernimmt den vereinbarten Turnus und kennt Ihr Gebäude, statt jedes Mal neu eingewiesen zu werden.',
+    image: {
+      src: '/images/gebaeudereinigung.jpeg',
+      alt: 'Reinigungskraft führt eine Einscheibenmaschine über den Steinboden einer Eingangshalle, daneben ein Warnschild vor Rutschgefahr.',
+      // Machine centre, warning sign left, person right. 45 % keeps the sign
+      // in frame on the wide flagship crop without losing the machine.
+      position: '45% 42%',
+    },
     items: [
       { slug: 'glas-fensterreinigung', name: 'Glas- und Fensterreinigung' },
       { slug: 'unterhaltsreinigung', name: 'Unterhaltsreinigung' },
@@ -101,6 +136,14 @@ export const serviceCategories = [
     // qualifications, and none about hazardous materials — see the header.
     blurb:
       'Vom Rückbau bis zur fertigen Fläche aus einer Hand. Sie koordinieren nicht vier Gewerke nacheinander, sondern haben einen Ansprechpartner, der die Reihenfolge kennt und die Übergaben verantwortet.',
+    image: {
+      src: '/images/abbruch.jpeg',
+      alt: 'Bauarbeiter in Warnschutzhose steht auf einer aufgebrochenen Betondecke mit freiliegender Bewehrung.',
+      // This one takes the narrowest crop on the page: two columns wide on a
+      // tile three rows tall. The boot sits right of centre, so a centred
+      // crop would cut it off and leave only wall.
+      position: '70% 60%',
+    },
     items: [
       { slug: 'gebaeudesanierung', name: 'Gebäudesanierung' },
       { slug: 'entkernung', name: 'Entkernung' },
@@ -117,6 +160,13 @@ export const serviceCategories = [
     anchor: 'entruempelung-logistik',
     blurb:
       'Wohnungen, Keller und Dachböden werden geräumt und besenrein übergeben, damit die Einheit wieder vermietbar ist. Verwertbares wird getrennt, der Rest ordnungsgemäß entsorgt.',
+    image: {
+      src: '/images/entruempelung.jpeg',
+      alt: 'Mitarbeiter lädt Umzugskartons in den Laderaum eines Transporters.',
+      // Open tailgate centre, person right. Slightly right of centre holds
+      // both the load and the person in a short two-column crop.
+      position: '55% 50%',
+    },
     items: [
       { slug: 'umzuege', name: 'Durchführung von Umzügen' },
       { slug: 'entruempelung', name: 'Entrümpelung' },
@@ -130,6 +180,13 @@ export const serviceCategories = [
     anchor: 'aussenbereich',
     blurb:
       'Das Gelände bleibt über das ganze Jahr in einem Zustand, den Sie niemandem erklären müssen. Im Sommer nach dem Wachstum, im Winter nach dem Wetter, beides ohne Einzelbeauftragung.',
+    image: {
+      src: '/images/aussenbereich.jpeg',
+      alt: 'Mitarbeiter mäht mit einem Freischneider den Rasen entlang einer Beetkante.',
+      // Subject dead centre. Pulled below the middle so a short crop keeps
+      // the cutting head and the grass rather than the sky.
+      position: '50% 48%',
+    },
     items: [
       { slug: 'garten-landschaftsbau', name: 'Garten- und Landschaftsbau' },
       { slug: 'gruenpflege', name: 'Grünpflege' },
@@ -148,12 +205,22 @@ export const serviceCategories = [
     anchor: 'hausmeisterservice',
     blurb:
       'Ein Ansprechpartner für Kontrollgänge, Kleinreparaturen, Müllmanagement und alles, was sonst zwischen den Gewerken liegen bleibt. Sie rufen einmal an, statt drei Firmen zu koordinieren.',
+    image: {
+      src: '/images/hausmeisterservice.jpeg',
+      alt: 'Hausmeister steht vor einem Mehrfamilienhaus und sieht zur Fassade.',
+      // The only tile whose photograph is a narrow upright column beside the
+      // copy. The person stands left of centre, so the crop is taken there.
+      position: '38% 35%',
+    },
     items: [
       {
         slug: 'technische-immobilienbetreuung',
         name: 'Technische Immobilienbetreuung',
       },
-      { slug: 'allgemeine-objektbetreuung', name: 'Allgemeine Objektbetreuung' },
+      {
+        slug: 'allgemeine-objektbetreuung',
+        name: 'Allgemeine Objektbetreuung',
+      },
     ],
   },
 ] as const satisfies readonly ServiceCategory[];

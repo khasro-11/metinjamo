@@ -4,7 +4,7 @@ import { primaryCta, serviceNav } from "@/config/navigation";
 import { cn } from "@/lib/cn";
 import { STAGGER } from "@/lib/motion";
 
-import { HeroVisual } from "./hero-visual";
+import { HeroBrandPlate } from "./hero-brand-plate";
 
 /**
  * Headline candidates put to the client. A wins: it carries the service term
@@ -120,8 +120,9 @@ const HEADER_SPACE = "6.875rem";
  * moves first and almost immediately, because it is the LCP element.
  *
  * Each step is a multiple of STAGGER.entrance so the rhythm is the scale's, not
- * a set of numbers picked by eye. The visual comes last: it is the one element
- * on the first screen that carries no information.
+ * a set of numbers picked by eye. The brand plate comes last: it is the one
+ * element on the first screen that carries no information the copy has not
+ * already given.
  */
 const STEP = STAGGER.entrance * 1000;
 
@@ -151,14 +152,14 @@ const UNDERLINE_CLASSES =
  * Landing hero. Centred stack, Soft Structuralism.
  *
  * Everything the visitor reads sits on one centre axis in a 4xl measure —
- * eyebrow, headline, subline, CTAs, service chips — with the window field
- * below it at the full shell width. The two measures are the composition: a
- * narrow column of copy over a wide band of image, rather than a split.
+ * eyebrow, headline, subline, CTAs, service chips — with the brand plate below
+ * it on the same axis in a narrower 3xl measure. The two measures are the
+ * composition: a column of copy closing on the mark, rather than a split.
  *
  * The background is the page's own paper. No mesh, no blob, nothing behind the
  * type — on a trust-first brief the headline's own contrast is the effect.
  *
- * Server component. Motion lives in the CSS entrance and in HeroLight.
+ * Server component. Motion lives entirely in the CSS entrance.
  */
 export function Hero() {
   return (
@@ -230,8 +231,8 @@ export function Hero() {
           </nav>
         </div>
 
-        <Entrance delay={ENTER.visual} distance={16} className="mt-14 md:mt-20">
-          <HeroVisual ratio="wide" className="w-full" />
+        <Entrance delay={ENTER.visual} distance={16} className="mt-12 md:mt-16">
+          <HeroBrandPlate className="mx-auto w-full max-w-2xl" />
         </Entrance>
       </div>
     </section>

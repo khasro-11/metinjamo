@@ -197,7 +197,7 @@ Feste Abfolge der Landing Page:
 | --- | ---------------- | --------------------------------- | ---- |
 | 1   | Hero             | Bild + Overlay `blue-900` 60–75 % | weiß |
 | 2   | Vertrauensleiste | `paper`                           | ink  |
-| 3   | Leistungen       | `blue-050`                        | ink  |
+| 3   | Leistungen       | `sand-100`                        | ink  |
 | 4   | Ablauf           | **`blue-900` vollflächig**        | weiß |
 | 5   | Warum Imperial   | `sand-100`                        | ink  |
 | 6   | Angebotsformular | `paper`                           | ink  |
@@ -210,7 +210,10 @@ Section 4 und 9 sind die **Farbanker**. Sie tragen den visuellen Rhythmus. Nicht
 
 Weitere Pflichtregeln:
 
-- **Bento nicht uniform:** 2–3 der Leistungs-Kacheln bekommen einen farbigen Grund (`blue-500` oder `blue-900`, Text weiß), der Rest bleibt hell. Erzeugt Hierarchie statt Gleichförmigkeit.
+- **Bento mit Bildern:** Jede der fünf Leistungs-Kacheln trägt ein Foto ihrer Kategorie, bezogen aus `services.ts`. Alle fünf werden dadurch dunkel, Text weiß. Die Hierarchie entsteht damit nicht mehr über Farbe hell/dunkel, sondern über Kachelgröße und Bildwirkung — die Kachelgrößen sind deshalb ausdrücklich ungleich zu halten.
+- **Leistungen steht auf `sand-100`, nicht auf `blue-050`.** Fünf dunkelblaue Bildkacheln auf blauem Grund verschmelzen, und die Section grenzt direkt an den `blue-900`-Anker in Section 4. Der warme Grund ist die Trennung zwischen beiden. `sand-100` trägt ink mit 15,01:1 und neutral-700 mit 7,31:1.
+- **Kein halbtransparenter Farbschleier über den Fotos.** Nicht abschwächen, sondern gar nicht: über einem Foto liegt kein Element. Lesbarkeit wird über getrennte Zonen hergestellt — das Foto behält sein eigenes Rechteck, die Schrift steht auf deckendem `blue-900`. Prüfbar und zu prüfen: kein Element, dessen Box ein Foto überlappt, darf irgendetwas zeichnen.
+- **Bildlook: Duotone zu 45 % über das Original gemischt**, nicht zu 100 %. Ein voller Duotone vereinheitlicht zwar perfekt, liest sich aber als blauer Film auf den Kacheln. Bei 45 % bleiben Orange, Gelb und Grün als sie selbst erkennbar, und die fünf Fotos ziehen trotzdem auf eine Temperatur. Die Mischung ist ein Filter auf den Pixeln (`feComposite operator="arithmetic"`), keine Ebene. Nicht `filter: hue-rotate`.
 - **Typografie einfärben:** in jeder H2 die 1–2 Kernbegriffe in Markenfarbe, Rest in `ink`. Eyebrows immer farbig.
 - **Große Ziffern** (Ablaufschritte) als tonale Flächen in `blue-050` oder `sand-100` hinter dem Inhalt.
 - **Icons** immer in einem runden farbigen Container, nie frei stehend.
