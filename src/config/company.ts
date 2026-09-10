@@ -83,6 +83,22 @@ export interface CompanyProfile {
   readonly legalName: string;
   readonly shortName: string;
   readonly legalForm: string;
+  /**
+   * How long the company has been trading, as a ready-to-set noun phrase.
+   *
+   * A phrase and not a number on purpose: the founding year is still missing
+   * (CLAUDE.md 12), so "über 6 Jahre" is the most precise honest statement
+   * available, and a computed `new Date().getFullYear() - founded` would grow
+   * by one every January without anyone checking whether it is still true.
+   *
+   * Use it verbatim. It is nominative, so it composes in labels
+   * ("über 6 Jahre in Duisburg") but NOT after a preposition — write around
+   * "seit …" rather than inflecting the string at the call site.
+   *
+   * TODO (client): supply the founding year. Once it exists this becomes an
+   * exact figure and the phrase can be tightened.
+   */
+  readonly yearsInBusiness: string;
   readonly address: PostalAddress;
   readonly phone: {
     /** Human-readable, as printed on business cards. */
@@ -153,6 +169,7 @@ export const company = {
   legalName: "Imperial Gebäudeservice GmbH",
   shortName: "Imperial Gebäudeservice",
   legalForm: "Gesellschaft mit beschränkter Haftung (GmbH)",
+  yearsInBusiness: "über 6 Jahre",
 
   address,
 

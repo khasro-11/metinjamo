@@ -64,7 +64,7 @@ export function Faq() {
     <section
       id="faq"
       aria-labelledby="faq-titel"
-      className="py-section md:py-section-lg"
+      className="bg-brand-050 py-section md:py-section-lg"
     >
       <FaqJsonLd />
 
@@ -79,7 +79,8 @@ export function Faq() {
 
             <Reveal delay={0.08}>
               <h2 id="faq-titel" className="mt-6 text-title-lg">
-                Was Verwaltungen und Eigentümer uns vorher fragen.
+                Was Verwaltungen und Eigentümer uns{' '}
+                <span className="text-brand-700">vorher fragen</span>.
               </h2>
             </Reveal>
 

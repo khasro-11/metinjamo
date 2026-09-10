@@ -44,6 +44,8 @@ Redaktionell     Metin Jamu, Anschrift wie oben
 - Sa nach Absprache
 - Akutfälle (Wasserschaden, Winterdienst) außerhalb der Zeiten telefonisch
 
+**Am Markt:** über 6 Jahre. In `company.ts` als `yearsInBusiness: "über 6 Jahre"` ablegen und überall von dort beziehen.
+
 **Einsatzgebiet:** Duisburg und Umgebung. Bei größeren Aufträgen auch darüber hinaus.
 
 ### Formulierungsregeln zu diesen Daten
@@ -79,14 +81,22 @@ Logo: Wortmarke „IMPERIAL" in Blau, „GEBÄUDE SERVICE GmbH" in Grau, dazu ei
 --imp-blue-050: #eaf4fa; /* Flächen, Hover */
 --imp-grey-700: #4a4d50; /* Subline im Logo, Fließtext */
 --imp-grey-400: #8a8f94;
---imp-paper: #fbfcfd; /* Seitenhintergrund, nicht reines Weiß */
---imp-ink: #0f1b24; /* Headlines */
+--imp-paper: #fbfcfd; /* helle Flächen, nicht reines Weiß */
+--imp-ink: #0f1b24; /* Headlines, Footer */
+
+/* Warmer Gegenspieler — verhindert, dass die Seite rein blau-kalt wirkt */
+--imp-sand-100: #f3ede4; /* Flächenfarbe für 1–2 Sections */
+--imp-sand-500: #c9a227; /* nur Akzente: Ziffern, Eyebrows, Icon-Details */
 ```
 
-- **Kein Dark Mode** in v1. Die Marke ist hell.
-- Akzentblau `--imp-blue-300` sparsam: CTA-Hover, aktive States, Icon-Details. Nicht flächig.
+- **Kein Dark Mode** in v1 — gemeint ist der umschaltbare Modus. Einzelne Sections sind sehr wohl vollflächig dunkel, siehe 5.9.
+- `--imp-blue-300` funktioniert **nur auf dunklem Grund**. Auf hellem Grund für Text immer `--imp-blue-700` oder `--imp-blue-900` nehmen, sonst reißt der Kontrast.
+- `--imp-sand-500` ist ein reiner Akzentton. Nie für Fließtext, nie flächig.
 - Das Logo-Icon (Fenster-Raster) darf als **dezentes Struktur-Motiv** aufgegriffen werden — z.B. als Grid-Rhythmus im Bento oder als Hairline-Kreuz in Karten. Nicht als Deko-Wasserzeichen überall.
-- Logo als SVG in `public/logo.svg` + `public/logo-mark.svg` (nur Icon, für Favicon/Mobile-Nav). **TODO:** SVG-Version vom Kunden anfordern, das JPEG ist keine Produktionsdatei.
+- **Logo-Dateien liegen fertig vor** und gehören nach `public/`:
+  `logo-imperial.svg` (Hauptlogo) · `logo-imperial-weiss.svg` (auf dunklem Grund) · `logo-imperial-mono.svg` (einfarbig) · dazu jeweils eine `-mark`-Variante (nur Bildmarke).
+- **Favicon-Set** liegt ebenfalls vor: `favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192/512`, `icon-512-maskable`, `og-image.png`, `site.webmanifest`. Das Favicon zeigt bewusst nur das reduzierte Fensterraster — das volle Motiv ist unter 32 px unlesbar.
+- Auf dunklen Sections und über dem Hero-Bild die **weiße** Logovariante verwenden, beim Scrollen auf die farbige wechseln.
 
 ---
 
@@ -96,30 +106,36 @@ Diese Seite darf nicht wie eine Baukasten-Handwerkerseite aussehen. Anspruch: Ag
 
 ### 5.1 Skills, die IMMER geladen werden
 
-Bei **jeder** UI-Aufgabe — neue Seite, neue Section, neue Komponente, Styling-Änderung, Redesign — lädst du **zuerst** diese Skills, bevor eine Zeile Code entsteht:
+Bei **jeder** UI-Aufgabe — neue Seite, neue Section, neue Komponente, Styling-Änderung, Redesign — lädst du **zuerst alle drei** Skills, bevor eine Zeile Code entsteht:
 
 ```
+frontend-design          (Anthropic-Skill, Basis)
 /design-taste-frontend
 /high-end-visual-design
 ```
 
-Zusätzlich, wenn es um grundsätzliche visuelle Richtung geht:
+`frontend-design` ist Anthropics eigener Skill und in dieser Umgebung unter
+`/mnt/skills/public/frontend-design/SKILL.md` hinterlegt. Er kennt die
+umgebungsspezifischen Vorgaben — verfügbare Bibliotheken, Design-Tokens,
+Rendering-Eigenheiten, Styling-Constraints. Genau die stehen nicht in den
+Trainingsdaten und werden sonst geraten.
 
-```
-frontend-design   (Anthropic-Skill)
-```
+**Reihenfolge einhalten:** erst `frontend-design` (was in dieser Umgebung
+überhaupt geht), dann `design-taste-frontend` (was gebaut wird), dann
+`high-end-visual-design` (wie es aussieht).
 
-**Nicht optional.** UI-Arbeit ohne diese Skills ist ungültig — abbrechen, Skills laden, neu anfangen.
+**Nicht optional, keiner der drei.** UI-Arbeit ohne diese Skills ist ungültig —
+abbrechen, Skills laden, neu anfangen.
 
 ### 5.2 Rollenverteilung
 
-| Skill                    | Rolle                                                                                               |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `design-taste-frontend`  | **Strategie.** Design Read, Dials, System-Wahl, Architektur, Anti-Slop-Kontrolle, Pre-Flight-Check. |
-| `high-end-visual-design` | **Ausführung.** Typo, Spacing, Double-Bezel, Motion-Choreografie, Micro-Interactions.               |
-| `frontend-design`        | **Richtung.** Wenn die ästhetische Grundentscheidung noch offen ist.                                |
+| Skill                    | Rolle                                                                                                                 |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `design-taste-frontend`  | **Strategie.** Design Read, Dials, System-Wahl, Architektur, Anti-Slop-Kontrolle, Pre-Flight-Check.                   |
+| `high-end-visual-design` | **Ausführung.** Typo, Spacing, Double-Bezel, Motion-Choreografie, Micro-Interactions.                                 |
+| `frontend-design`        | **Basis.** Umgebungsvorgaben, verfügbare Bibliotheken, Design-Tokens, Styling-Constraints. Wird immer zuerst geladen. |
 
-Bei Widerspruch: `design-taste-frontend` entscheidet **was**, `high-end-visual-design` entscheidet **wie es aussieht**. Bei Barrierefreiheit und Performance gewinnt immer die konservativere Regel.
+Bei Widerspruch: `frontend-design` setzt den technisch machbaren Rahmen, `design-taste-frontend` entscheidet **was** gebaut wird, `high-end-visual-design` entscheidet **wie es aussieht**. Eine technische Vorgabe aus `frontend-design` schlägt jede ästhetische Präferenz. Bei Barrierefreiheit und Performance gewinnt immer die konservativere Regel.
 
 ### 5.3 Fester Design Read
 
@@ -130,17 +146,21 @@ Gib diesen Read vor jeder größeren UI-Ausgabe aus:
 ### 5.4 Dials (bewusste Abweichung vom 8/6/4-Baseline)
 
 ```
-DESIGN_VARIANCE: 7    # eigenständig, nicht experimentell
+DESIGN_VARIANCE: 8    # hochgezogen von 7 — v1 wirkte blass und leblos
 MOTION_INTENSITY: 5   # schwer und ruhig, keine Dauerschleifen
 VISUAL_DENSITY: 4     # großzügig, aber scanbar
 ```
 
 **Begründung, die zu respektieren ist:** Ein Gebäudedienstleister verkauft Verlässlichkeit. Awwwards-Chaos zerstört hier Vertrauen. Ziel ist „teuer und solide", nicht „Creative Studio".
 
+**Aber:** seriös heißt nicht farblos. Die erste Fassung war durchgehend hell und wirkte tot. Farbe und Kontrast zwischen den Sections sind ausdrücklich erwünscht — verboten sind nur schrille Verläufe und Effekthascherei, nicht Farbe an sich.
+
 ### 5.5 Archetypen
 
 - **Vibe:** primär **Soft Structuralism** — helle Flächen, massive Grotesk-Typo, extrem weiche diffuse Ambient-Shadows. Für „Über uns" / Referenzen optional **Editorial Luxury** mit warmem Neutralton und feinem Film-Grain.
-- **Layout:** **Asymmetrical Bento** für Leistungen und Kennzahlen, **Editorial Split** für Hero und Über-uns.
+- **Layout:** **Asymmetrical Bento** für Leistungen und Kennzahlen, **Editorial Split** für Über-uns.
+- **Hero:** zentriert über großflächigem Hintergrundbild mit dunklem Overlay. Kein Editorial Split.
+- **Header:** Logo **rechts**, Navigation links davon. Floating Glass Pill, vom oberen Rand abgesetzt.
 - **Kein** Ethereal Glass / OLED-Dark-Tech. Passt nicht zur Branche.
 
 ### 5.6 Referenz-Umgang: service-uysal.de
@@ -164,6 +184,39 @@ Diese Seite ist **Struktur-Referenz, kein Design-Vorbild und keine Textquelle.**
 - Nicht deren Farbwelt — wir haben eigene Markenfarben
 - Nicht das Rabatt-/Paketmodell, solange der Kunde das nicht bestätigt hat
 - Kein Emoji im Telefon-Link in der Nav
+
+### 5.9 Farb- und Sectionrhythmus (verbindlich)
+
+Der häufigste Fehler bei dieser Seite war: alle Sections auf demselben hellen Grund. Dann verpufft jede Farbe darin.
+
+**Regel: nie mehr als zwei helle Sections hintereinander.**
+
+Feste Abfolge der Landing Page:
+
+| #   | Section          | Hintergrund                       | Text |
+| --- | ---------------- | --------------------------------- | ---- |
+| 1   | Hero             | Bild + Overlay `blue-900` 60–75 % | weiß |
+| 2   | Vertrauensleiste | `paper`                           | ink  |
+| 3   | Leistungen       | `blue-050`                        | ink  |
+| 4   | Ablauf           | **`blue-900` vollflächig**        | weiß |
+| 5   | Warum Imperial   | `sand-100`                        | ink  |
+| 6   | Angebotsformular | `paper`                           | ink  |
+| 7   | Kontaktwege      | `blue-050`                        | ink  |
+| 8   | FAQ              | `paper`                           | ink  |
+| 9   | Abschluss-CTA    | **`blue-900` vollflächig**        | weiß |
+| 10  | Footer           | `ink`                             | weiß |
+
+Section 4 und 9 sind die **Farbanker**. Sie tragen den visuellen Rhythmus. Nicht aufhellen.
+
+Weitere Pflichtregeln:
+
+- **Bento nicht uniform:** 2–3 der Leistungs-Kacheln bekommen einen farbigen Grund (`blue-500` oder `blue-900`, Text weiß), der Rest bleibt hell. Erzeugt Hierarchie statt Gleichförmigkeit.
+- **Typografie einfärben:** in jeder H2 die 1–2 Kernbegriffe in Markenfarbe, Rest in `ink`. Eyebrows immer farbig.
+- **Große Ziffern** (Ablaufschritte) als tonale Flächen in `blue-050` oder `sand-100` hinter dem Inhalt.
+- **Icons** immer in einem runden farbigen Container, nie frei stehend.
+- **Film-Grain** als fixed Overlay, `pointer-events: none`, ca. 3 % — nimmt dem Hellen das Sterile.
+
+**Kontrollpflicht:** Nach jeder eingefärbten Fläche den Kontrast messen und die Werte nennen. Weiß auf `blue-500` reicht für Fließtext **nicht** — dort `blue-900` verwenden.
 
 ### 5.7 Harte Verbote
 
@@ -195,11 +248,17 @@ Framework    Next.js (App Router, RSC als Default)
 Styling      Tailwind v4  →  @tailwindcss/postcss, NICHT tailwindcss als PostCSS-Plugin
 Motion       motion/react  (nicht framer-motion importieren)
 Icons        @phosphor-icons/react, weight="light", global einheitlich
-Fonts        next/font, self-hosted. Geist — vom Kunden bestätigt am 08.09.2026
+Fonts        next/font, self-hosted. Vorschlag: Geist oder Plus Jakarta Sans
 Sprache      TypeScript, strict
 Forms        react-hook-form + zod
-Mail         TODO — Resend / SMTP / Formspree, mit Kunden klären
-Hosting      TODO — Vercel / Hetzner / IONOS, mit Kunden klären
+Mail         Nodemailer über SMTP des eigenen Postfachs (info@imperial-gmbh.com)
+             Kein Drittanbieter, kein AVV, kein Absatz in der Datenschutzerklärung.
+             Zugangsdaten ausschließlich als Env-Vars, nie im Repo.
+Bot-Schutz   Honeypot-Feld + Zeitfalle (<3 s = verwerfen) + serverseitiges
+             Rate-Limit pro IP. Kein externer Captcha-Dienst in v1.
+Hosting      Cloudflare Pages (kostenlos, kommerzielle Nutzung erlaubt)
+             NICHT Vercel Hobby — laut Fair-Use-Richtlinien nicht-kommerziell
+             beschränkt, eine GmbH-Website fällt nicht darunter.
 ```
 
 **RSC-Regeln**
@@ -214,8 +273,7 @@ Hosting      TODO — Vercel / Hetzner / IONOS, mit Kunden klären
 
 ```
 /                       Landing Page (Hauptfokus)
-/leistungen             Übersicht
-/leistungen/[slug]      Detailseite je Leistung, eigene SEO-Landingpage
+/leistungen             Übersicht aller Leistungen (eine Seite, keine Detailseiten)
 /ueber-uns              Unternehmen, Geschäftsführung, Werte
 /referenzen             Objekte & Kundenstimmen   (erst wenn echte Inhalte da sind)
 /kontakt                Formular, Kontaktdaten, Anfahrt
@@ -225,7 +283,7 @@ Hosting      TODO — Vercel / Hetzner / IONOS, mit Kunden klären
 
 **Landing-Page-Sections in dieser Reihenfolge:**
 
-1. Hero — Editorial Split, Leistungsversprechen + „Duisburg und Umgebung" + primärer CTA + Leistungs-Chips
+1. Hero — zentriert über Hintergrundbild mit Overlay, Leistungsversprechen + „Duisburg und Umgebung" + primärer CTA + Leistungs-Chips
 2. Vertrauensleiste — 10 Mio. € Betriebshaftpflicht, GmbH mit HR-Eintrag, feste Erreichbarkeit _(nur belegbare Punkte)_
 3. Leistungen — Asymmetrical Bento
 4. Ablauf — 4 Schritte von Anfrage bis Ausführung
@@ -236,6 +294,28 @@ Hosting      TODO — Vercel / Hetzner / IONOS, mit Kunden klären
 9. FAQ
 10. Abschluss-CTA
 11. Footer — Kontakt, Zeiten, Einsatzgebiet, Rechtliches
+
+---
+
+## 7a. Leistungskatalog (verbindlich)
+
+Fünf Kategorien, 18 Einzelleistungen. Gehört als typisiertes Array nach `src/content/services.ts` und wird von Bento, Hero-Chips, Formular und JSON-LD von dort bezogen. **Keine Unterseiten je Leistung.**
+
+| Kategorie                   | Anker                     | Einzelleistungen                                                                                              |
+| --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Gebäudereinigung**        | `#gebaeudereinigung`      | Glas- und Fensterreinigung · Unterhaltsreinigung · Grundreinigung · Baureinigung                              |
+| **Abbruch & Sanierung**     | `#abbruch-sanierung`      | Gebäudesanierung · Entkernung · Wasserschadensanierung · Trockenlegung · Trockenbauarbeiten · Fliesenarbeiten |
+| **Entrümpelung & Logistik** | `#entruempelung-logistik` | Durchführung von Umzügen · Entrümpelung · Sperrmüllentsorgung                                                 |
+| **Außenbereich & Gelände**  | `#aussenbereich`          | Garten- und Landschaftsbau · Grünpflege · Winterdienst (Räum- und Streupflicht)                               |
+| **Hausmeisterservice**      | `#hausmeisterservice`     | Technische Immobilienbetreuung · Allgemeine Objektbetreuung                                                   |
+
+**Reihenfolge nicht ändern.** Gebäudereinigung steht zuerst, weil es das Kerngeschäft ist und im Logo abgebildet wird.
+
+**Formulierungshinweise:**
+
+- „Winterdienst" immer mit dem Zusatz „Räum- und Streupflicht" — das ist für Hausverwaltungen das Kaufargument, weil sie damit eine gesetzliche Pflicht auslagern.
+- Wasserschadensanierung ist die inhaltliche Klammer zum Akutfall-Hinweis aus Abschnitt 2. Beides zusammen denken.
+- Bei Abbruch, Sanierung und Trockenbau keine Aussagen zu Zertifikaten, Meisterbrief oder Schadstoffsanierung (Asbest, KMF) treffen, solange das nicht belegt ist. Das ist ein rechtlich sensibler Bereich.
 
 ---
 
@@ -279,7 +359,9 @@ Hosting      TODO — Vercel / Hetzner / IONOS, mit Kunden klären
 - Next.js `Metadata` API, pro Route eigener `title` + `description`
 - `sitemap.xml`, `robots.txt`
 - Deutsche Slugs ohne Umlaute (`ueber-uns`)
-- Jede Leistung eigener echter Text — kein Duplicate Content, keine Städte-Doorway-Pages
+- **Keine Detailseiten je Leistung** — bewusste Entscheidung. Alle Leistungen liegen auf der Landing Page und auf `/leistungen`.
+- Jede Leistungskategorie bekommt einen eigenen Anker (`#gebaeudereinigung` usw.) für die Hero-Chips und für Deeplinks
+- Keine Städte-Doorway-Pages
 - Alle Bilder mit sinnvollem deutschem `alt`
 
 ---
@@ -287,7 +369,7 @@ Hosting      TODO — Vercel / Hetzner / IONOS, mit Kunden klären
 ## 10. Arbeitsweise für Claude Code
 
 1. **Design Read ausgeben** (5.3), bevor UI-Code entsteht
-2. **Beide Design-Skills laden**, immer
+2. **Alle drei Design-Skills laden**, immer, in der Reihenfolge aus 5.1
 3. **Section für Section**, nicht die ganze Seite auf einmal. Nach jeder Section kurz zeigen, was gebaut wurde
 4. **Erst fragen, dann erfinden** — fehlende Daten sind `TODO`, keine Erfindung
 5. **Maximal eine Klärungsfrage** auf einmal, nur wenn die Entscheidung wirklich offen ist
@@ -299,7 +381,7 @@ Hosting      TODO — Vercel / Hetzner / IONOS, mit Kunden klären
 
 ## 11. Definition of Done (pro Section)
 
-- [ ] Design Read passt, Dials eingehalten
+- [ ] Alle drei Design-Skills geladen, Design Read passt, Dials eingehalten
 - [ ] Keine verbotenen Fonts, Icons, Borders, Shadows, Layouts, Motion-Patterns
 - [ ] Vibe- und Layout-Archetyp bewusst gewählt
 - [ ] Double-Bezel bei allen Karten/Containern
@@ -311,14 +393,19 @@ Hosting      TODO — Vercel / Hetzner / IONOS, mit Kunden klären
 - [ ] Firmendaten ausschließlich aus `company.ts`
 - [ ] Nur `transform`/`opacity` animiert
 - [ ] Rechtliche Links im Footer vorhanden
+- [ ] Sectionrhythmus aus 5.9 eingehalten — nie mehr als zwei helle Sections in Folge
+- [ ] Kontrastwerte aller eingefärbten Flächen gemessen und genannt
 
 ---
 
 ## 12. Offene Punkte (vom Kunden zu liefern)
 
-- [ ] **Leistungskatalog** — welche Leistungen genau? (Unterhaltsreinigung, Treppenhaus, Glas, Grünpflege, Winterdienst, Hausmeister, Entrümpelung, Baureinigung …)
-- [ ] Logo als **SVG** (aktuell nur JPEG)
-- [ ] Gründungsjahr, Mitarbeiterzahl
+- [x] ~~Leistungskatalog~~ — erledigt, siehe Abschnitt 7a
+- [ ] Für Abbruch/Sanierung: liegen Nachweise, Zertifikate oder ein Meisterbetrieb vor? Falls ja, gehört das prominent auf die Seite. Falls nein, keine entsprechenden Aussagen treffen.
+- [x] ~~Logo als SVG~~ — erledigt, Logo- und Favicon-Set liegen vor
+- [ ] Mitarbeiterzahl
+- [ ] **Bezugspunkt der „über 6 Jahre" klären** — GmbH oder Vorgängerbetrieb? Falls die GmbH jünger ist, „über 6 Jahre Erfahrung im Gebäudeservice" formulieren, nicht „die GmbH besteht seit 6 Jahren". Geschäftskunden prüfen den Handelsregisterauszug.
+- [ ] **Hero-Hintergrundbild mit Lizenz** — das bisher vorgeschlagene Architekturfoto ist eine geschützte Aufnahme und zeigt ein Gebäude in Frankreich. Beides ungeeignet: Abmahnrisiko plus fehlender Regionalbezug. Besser ein echtes betreutes Objekt aus Duisburg oder ein lizenziertes Bild.
 - [ ] Echte Referenzobjekte + Freigabe zur Nennung
 - [ ] Echte Kundenstimmen / Google-Bewertungen
 - [ ] Eigene Fotos von Team und Objekten
@@ -327,13 +414,3 @@ Hosting      TODO — Vercel / Hetzner / IONOS, mit Kunden klären
 - [ ] Domain, Hosting, Postfach für Formular-Zustellung
 - [ ] WhatsApp-Business-Nummer — ja oder nein?
 - [ ] Preis-/Paketmodell — ja oder nein?
-
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->

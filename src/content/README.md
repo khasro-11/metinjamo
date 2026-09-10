@@ -3,19 +3,16 @@
 Editorial content as typed TS modules, kept out of the components so copy can
 be reviewed without touching markup.
 
-- `services.ts` — the service catalogue. Single source of truth for the footer
-  column, the hero chips, the Leistungen bento, the `/leistungen/[slug]` routes
-  and the quote form. Pure data, no React: presentation (icons, bento tile
-  sizes) is keyed by `ServiceSlug` next to the markup that uses it.
+- `services.ts` — the service catalogue: five categories holding eighteen
+  individual services (CLAUDE.md 7a). Single source of truth for the footer
+  column, the hero chips, the Leistungen bento, the quote form and the JSON-LD
+  offer catalogue. Pure data, no React: presentation (icons, bento tile sizes)
+  is keyed by `ServiceCategorySlug` next to the markup that uses it.
 
-  **The catalogue is not client-confirmed yet** (CLAUDE.md 12). See the module
-  header for the open questions.
-
-- `service-details.ts` — the long-form copy behind each `/leistungen/[slug]`
-  page: headline, lead, Leistungsumfang, Objektarten, Ablauf, verwandte
-  Leistungen und die Metadaten. A total record over `ServiceSlug`, so a new
-  service cannot ship a detail page without its own text. Every page is written
-  from scratch; nothing here is a template with the noun swapped.
+  Categories are the addressable unit. Each carries an `anchor` that resolves
+  to its bento tile on the landing page; there are deliberately no
+  `/leistungen/[slug]` detail routes, and the eight that used to exist are
+  redirected to those anchors in `next.config.ts`.
 
 - `faq.ts` — the landing-page FAQ. One source for the accordion and the
   `FAQPage` JSON-LD next to it.

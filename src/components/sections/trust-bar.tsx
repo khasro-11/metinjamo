@@ -5,7 +5,7 @@ import { PhoneCallIcon } from '@phosphor-icons/react/dist/ssr/PhoneCall';
 import { ShieldCheckIcon } from '@phosphor-icons/react/dist/ssr/ShieldCheck';
 import type { Icon } from '@phosphor-icons/react/dist/lib/types';
 
-import { Reveal } from '@/components/ui';
+import { IconBadge, Reveal } from '@/components/ui';
 import type { Weekday } from '@/config/company';
 import { company, regularOpeningHours } from '@/config/company';
 import { cn } from '@/lib/cn';
@@ -129,7 +129,7 @@ export function TrustBar() {
          evidenced, not a new topic. The bottom is the standard section
          boundary, so the step into Leistungen is the same size as every other
          step down the page. */
-      className="pt-16 pb-section md:pt-20 md:pb-section-lg"
+      className="bg-paper pt-16 pb-section md:pt-20 md:pb-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <h2 id="vertrauen-titel" className="sr-only">
@@ -198,12 +198,9 @@ export function TrustBar() {
                 index === TRUST_FACTS.length - 1 && 'sm:col-span-2 lg:col-span-1',
               )}
             >
-              <fact.icon
-                size={22}
-                weight="light"
-                aria-hidden="true"
-                className="text-brand-700"
-              />
+              <IconBadge size="md">
+                <fact.icon size={20} weight="light" />
+              </IconBadge>
 
               <p
                 data-numeric={fact.numeric ? '' : undefined}

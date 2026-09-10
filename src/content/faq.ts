@@ -29,6 +29,7 @@
  */
 
 import { company } from '@/config/company';
+import { serviceCategories } from '@/content/services';
 
 export interface FaqItem {
   /** Phrased as the visitor would ask it, not as a headline. */
@@ -40,12 +41,18 @@ export interface FaqItem {
 export const faqItems: readonly FaqItem[] = [
   {
     question: 'Welche Leistungen übernehmen Sie?',
-    // TODO (client, CLAUDE.md 12): the catalogue behind this sentence is NOT
-    // confirmed — see the header TODO in content/services.ts. If a service is
-    // dropped there, it has to disappear from this answer in the same commit,
-    // because this text also goes into the search results as JSON-LD.
-    answer:
-      'Unterhaltsreinigung, Treppenhausreinigung, Glas- und Rahmenreinigung, Grünpflege und Außenanlagen, Winterdienst, Hausmeisterservice, Entrümpelung und Haushaltsauflösung sowie Bauendreinigung. In den meisten Objekten ist es nicht eine einzelne Leistung, sondern eine Kombination aus zwei oder drei, die in einem gemeinsamen Leistungsverzeichnis zusammenlaufen.',
+    // Built from the catalogue rather than typed out, so this answer cannot
+    // fall behind content/services.ts. It ships as FAQPage JSON-LD as well as
+    // visible copy, and a stale list here would put services into the search
+    // result that the page no longer offers.
+    //
+    // Category names only. Naming all eighteen individual services would make
+    // this the longest answer in the FAQ by a wide margin and bury the second
+    // sentence, which is the one that actually answers what a Verwalter is
+    // asking. The individual services are one scroll away, in the bento.
+    answer: `${serviceCategories
+      .map((category) => category.category)
+      .join(', ')}. Dahinter stehen achtzehn einzelne Leistungen, die Sie auf der Seite unter „Leistungen“ im Detail sehen. In den meisten Objekten ist es nicht eine einzelne davon, sondern eine Kombination aus zwei oder drei, die in einem gemeinsamen Leistungsverzeichnis zusammenlaufen.`,
   },
   {
     question: 'Können wir den Leistungsumfang auf unser Objekt zuschneiden?',

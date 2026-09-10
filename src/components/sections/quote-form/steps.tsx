@@ -1,6 +1,8 @@
 'use client';
 
+import { CheckIcon } from '@phosphor-icons/react/dist/ssr/Check';
 import { PencilSimpleIcon } from '@phosphor-icons/react/dist/ssr/PencilSimple';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import type { ReactNode, Ref } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
@@ -12,8 +14,14 @@ import {
   TextAreaField,
   TextField,
 } from '@/components/ui/field';
-import { services } from '@/content/services';
+import {
+  getCategoryOfItem,
+  getServiceCategory,
+  getServiceItem,
+  serviceCategories,
+} from '@/content/services';
 import { cn } from '@/lib/cn';
+import { EASE_IMPERIAL } from '@/lib/motion';
 import {
   frequencyLabel,
   frequencyOptions,
@@ -111,14 +119,144 @@ function ChoiceGrid({
    1 — Leistungen
    --------------------------------------------------------------------------- */
 
+/**
+ * The individual services of one category, revealed once the category is
+ * ticked.
+ *
+ * Height is animated from `0` to `auto` through Motion rather than through a
+ * `max-height` guess, so a two-item category and a six-item one both open to
+ * exactly their own height with no dead space and no clipping. Motion animates
+ * this off the main thread and reads the target height itself, which is the
+ * one case where animating a layout property is the correct trade: the
+ * alternative is a hardcoded maximum that is wrong for four of the five
+ * categories.
+ *
+ * `aria-hidden` is deliberately absent. The wrapper is unmounted when the
+ * category is closed, so there is nothing to hide from the accessibility tree,
+ * and the checkboxes inside are real inputs in the tab order whenever they are
+ * on screen.
+ */
+function CategoryServices({
+  category,
+}: {
+  category: (typeof serviceCategories)[number];
+}) {
+  const { register } = useFormContext<QuoteRequest>();
+  const reduce = useReducedMotion();
+
+  return (
+    <motion.div
+      initial={reduce ? false : { height: 0, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      exit={reduce ? undefined : { height: 0, opacity: 0 }}
+      transition={{ duration: 0.32, ease: EASE_IMPERIAL }}
+      className="overflow-hidden"
+    >
+      <fieldset className="mt-3 rounded-bezel-md bg-brand-050/70 px-5 py-4 shadow-[var(--shadow-hairline-brand)]">
+        <legend className="px-1 text-micro text-neutral-500">
+          Einzelne Leistungen in {category.category}, optional
+        </legend>
+
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-3">
+          {category.items.map((item) => (
+            <label
+              key={item.slug}
+              className="group inline-flex min-h-11 cursor-pointer items-center gap-2.5"
+            >
+              <input
+                type="checkbox"
+                value={item.slug}
+                className="peer sr-only"
+                {...register('services')}
+              />
+
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'grid size-[1.125rem] shrink-0 place-items-center rounded-[0.4rem]',
+                  'bg-white shadow-[inset_0_0_0_1.5px_rgb(15_27_36/0.16)]',
+                  'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
+                  'group-hover:shadow-[inset_0_0_0_1.5px_var(--color-brand-300)]',
+                  'peer-checked:bg-brand-900',
+                  'peer-checked:shadow-[inset_0_0_0_1.5px_var(--color-brand-900)]',
+                  'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2',
+                  'peer-focus-visible:outline-brand-500',
+                )}
+              >
+                {/* Transform and opacity only — the mark scales up out of the
+                    box rather than the box changing size. */}
+                <span
+                  className={cn(
+                    'scale-50 opacity-0',
+                    'transition-[transform,opacity] duration-[var(--duration-swift)] ease-imperial',
+                    // `group-has-`, not `peer-checked:`: this span is a
+                    // grandchild of the input, and the sibling combinator
+                    // `peer-*` compiles to cannot reach it. Same idiom as
+                    // ChoiceCard.
+                    'group-has-[:checked]:scale-100 group-has-[:checked]:opacity-100',
+                  )}
+                >
+                  <CheckIcon size={13} weight="light" className="text-brand-300" />
+                </span>
+              </span>
+
+              <span className="text-body-sm text-ink">{item.name}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    </motion.div>
+  );
+}
+
+/**
+ * Step one, in two stages: the five categories first, and the individual
+ * services of a category once that category is selected (CLAUDE.md 7a).
+ *
+ * Eighteen checkboxes in one flat list was the alternative and is the wrong
+ * shape for the first thing the form asks. It is a wall, it hides the
+ * structure the rest of the site teaches, and it makes the cheapest possible
+ * answer ("Gebäudereinigung") cost four clicks.
+ *
+ * The category selection is watched rather than held in `useState`: react-hook-form
+ * already owns this value, and a second copy in component state is exactly the
+ * kind of duplicate that drifts when the user jumps back from the review step.
+ */
 export function StepServices({ step, headingRef }: StepBodyProps) {
   const {
+    control,
     register,
+    setValue,
+    getValues,
     formState: { errors },
   } = useFormContext<QuoteRequest>();
 
-  const error = errors.services?.message;
+  const selectedCategories =
+    useWatch({ control, name: 'serviceCategories' }) ?? [];
+
+  const error = errors.serviceCategories?.message ?? errors.services?.message;
   const errorId = error ? 'services-error' : undefined;
+
+  /**
+   * Closing a category drops the individual services that belonged to it.
+   *
+   * Without this, unticking a category would leave its services in form state:
+   * invisible, unremovable, and still on their way to the inbox. The schema
+   * rejects exactly that combination on the server, so leaving them would also
+   * turn a stale checkbox into a validation error the user cannot see the
+   * cause of.
+   */
+  const handleCategoryToggle = (slug: string, checked: boolean) => {
+    if (checked) return;
+
+    setValue(
+      'services',
+      (getValues('services') ?? []).filter(
+        (itemSlug) => getCategoryOfItem(itemSlug)?.slug !== slug,
+      ),
+      { shouldValidate: false },
+    );
+  };
 
   return (
     <StepFrame step={step} headingRef={headingRef}>
@@ -129,28 +267,47 @@ export function StepServices({ step, headingRef }: StepBodyProps) {
         role="group"
         labelledBy={`${step.id}-titel`}
         describedBy={errorId}
-        className="sm:grid-cols-2 lg:grid-cols-3"
+        className="sm:grid-cols-2"
       >
-        {services.map((service, index) => (
-          <ChoiceCard
-            key={service.slug}
-            type="checkbox"
-            value={service.slug}
-            label={service.name}
-            // The first card is wide on `lg`, which turns eight items into
-            // nine cells — three even rows instead of a five-plus-three
-            // orphan, and an asymmetry that echoes the Leistungen bento.
-            className={index === 0 ? 'lg:col-span-2' : undefined}
-            {...register('services')}
-          />
-        ))}
+        {serviceCategories.map((category, index) => {
+          const isOpen = selectedCategories.includes(category.slug);
+
+          return (
+            <div
+              key={category.slug}
+              // Gebäudereinigung is the core business and leads the catalogue,
+              // so it takes the full row rather than sharing one. That also
+              // turns five cards into six cells: three even rows instead of a
+              // four-plus-one orphan, and an asymmetry that echoes the bento.
+              className={index === 0 ? 'sm:col-span-2' : undefined}
+            >
+              <ChoiceCard
+                type="checkbox"
+                value={category.slug}
+                label={category.category}
+                hint={`${category.items.length} Leistungen`}
+                {...register('serviceCategories', {
+                  onChange: (event) =>
+                    handleCategoryToggle(
+                      event.target.value,
+                      event.target.checked,
+                    ),
+                })}
+              />
+
+              <AnimatePresence initial={false}>
+                {isOpen ? <CategoryServices category={category} /> : null}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </ChoiceGrid>
 
       {error ? <FieldError id={errorId!}>{error}</FieldError> : null}
 
       <p className="mt-6 max-w-copy text-micro text-neutral-500">
-        Sie können mehrere Leistungen kombinieren. Was davon sinnvoll ist,
-        klären wir bei der Besichtigung.
+        Sie können mehrere Bereiche kombinieren. Wenn Sie keine einzelnen
+        Leistungen anhaken, klären wir den Umfang bei der Besichtigung.
       </p>
     </StepFrame>
   );
@@ -440,9 +597,31 @@ export function StepReview({
 
   const values = useWatch({ control });
 
-  const selectedServices = (values.services ?? [])
-    .map((slug) => services.find((service) => service.slug === slug)?.name)
-    .filter((name) => name !== undefined);
+  /*
+   * The summary mirrors the two stages of step one: one line per selected
+   * category, with the individual services the visitor picked inside it.
+   *
+   * A category chosen without any individual service is shown on its own,
+   * because that is a complete and valid answer — not an incomplete one. It
+   * deliberately does not print "alle Leistungen": the visitor did not say
+   * that, and reading it back to them as if they had is how a summary turns
+   * into a claim they never made.
+   */
+  const selectedItems = values.services ?? [];
+
+  const serviceSummary = (values.serviceCategories ?? []).map((slug) => {
+    const category = getServiceCategory(slug);
+    const picked = selectedItems
+      .filter((itemSlug) => getCategoryOfItem(itemSlug)?.slug === slug)
+      .map((itemSlug) => getServiceItem(itemSlug)?.name)
+      .filter((name) => name !== undefined);
+
+    return {
+      slug,
+      label: category?.category ?? slug,
+      detail: picked.join(', '),
+    };
+  });
 
   const placeLine = [values.postalCode, values.location]
     .filter((part) => hasValue(part))
@@ -460,10 +639,13 @@ export function StepReview({
         <div className="imp-bezel-core bg-white/80 px-5 py-1 shadow-[var(--shadow-bevel)] sm:px-7">
           <div className="divide-y divide-ink/[0.07]">
             <SummaryGroup title="Leistungen" stepIndex={0} onEdit={onEdit}>
-              <SummaryRow
-                label="Ausgewählt"
-                value={selectedServices.join('\n')}
-              />
+              {serviceSummary.map((entry) => (
+                <SummaryRow
+                  key={entry.slug}
+                  label={entry.label}
+                  value={entry.detail || 'Umfang wird am Objekt bestimmt'}
+                />
+              ))}
             </SummaryGroup>
 
             <SummaryGroup title="Turnus" stepIndex={1} onEdit={onEdit}>

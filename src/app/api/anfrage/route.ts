@@ -82,8 +82,12 @@ export async function POST(request: Request): Promise<Response> {
      Whatever is chosen, this is what has to happen here:
 
        1. Send the request to the company mailbox. The subject line should
-          carry the postal code and the first service, so the inbox stays
-          sortable without opening every mail. Set Reply-To to
+          carry the postal code and the first service category, so the inbox
+          stays sortable without opening every mail. The body should print the
+          selected categories with the individual services nested under them,
+          the same shape the review step shows — a flat list of eighteen
+          possible slugs loses which category each one was chosen under. Set
+          Reply-To to
           `quoteRequest.email` so a reply reaches the customer rather than the
           sending domain.
        2. Send a confirmation to `quoteRequest.email` restating what was
@@ -112,7 +116,8 @@ export async function POST(request: Request): Promise<Response> {
   // Non-identifying, so it stays useful for "does the form work at all"
   // without putting personal data into a platform log.
   console.info(
-    `[anfrage] validated request: ${quoteRequest.services.length} service(s), ` +
+    `[anfrage] validated request: ${quoteRequest.serviceCategories.length} ` +
+      `category/-ies, ${quoteRequest.services.length} service(s), ` +
       `frequency=${quoteRequest.frequency}, type=${quoteRequest.propertyType}`,
   );
 

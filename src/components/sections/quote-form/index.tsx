@@ -3,7 +3,7 @@ import { LockKeyIcon } from '@phosphor-icons/react/dist/ssr/LockKey';
 import { MapPinIcon } from '@phosphor-icons/react/dist/ssr/MapPin';
 import type { Icon } from '@phosphor-icons/react/dist/lib/types';
 
-import { Eyebrow, Reveal } from '@/components/ui';
+import { Eyebrow, IconBadge, Reveal } from '@/components/ui';
 import { company } from '@/config/company';
 
 import { QuoteForm } from './quote-form';
@@ -38,8 +38,16 @@ const ASSURANCES: readonly { icon: Icon; text: string }[] = [
  * Layout is an Editorial Split header over a single centred card, which is a
  * deliberate break from the rails and bento fields further up: a form is one
  * task, and a sticky column beside it would compete with the thing the visitor
- * is supposed to be doing. The tinted band, faded at both ends rather than cut
- * as a hard block, is what separates the section instead.
+ * is supposed to be doing. A flat brand-050 ground is what separates the
+ * section instead.
+ *
+ * The tint used to be a gradient band faded out at both ends. That was the
+ * right call while every section shared one paper ground, because a hard edge
+ * would have been the only edge on the page. Now that the page runs an
+ * alternating rhythm, a faded band reads as a section that could not commit:
+ * the boundary above it lands mid-fade instead of at the section edge, so the
+ * step from Uber uns into the form is the one step down the page you cannot
+ * see. Flat fill, edge to edge.
  *
  * Server component. All interactivity is isolated in the `QuoteForm` leaf.
  */
@@ -48,13 +56,8 @@ export function QuoteFormSection() {
     <section
       id="angebot"
       aria-labelledby="angebot-titel"
-      className="relative py-section md:py-section-lg"
+      className="bg-brand-050 py-section md:py-section-lg"
     >
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,transparent,rgb(234_244_250/0.75)_14%,rgb(234_244_250/0.75)_86%,transparent)]"
-      />
-
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <div className="grid gap-6 lg:grid-cols-12 lg:gap-x-14">
           <div className="lg:col-span-7">
@@ -64,7 +67,8 @@ export function QuoteFormSection() {
 
             <Reveal delay={0.08}>
               <h2 id="angebot-titel" className="mt-6 text-title-lg">
-                Sagen Sie uns, worum es geht — den Rest klären wir am Objekt.
+                Sagen Sie uns, worum es geht — den Rest klären wir{' '}
+                <span className="text-brand-700">am Objekt</span>.
               </h2>
             </Reveal>
           </div>
@@ -81,12 +85,9 @@ export function QuoteFormSection() {
             <ul className="mt-7 grid gap-3.5">
               {ASSURANCES.map((assurance) => (
                 <li key={assurance.text} className="flex items-start gap-3">
-                  <assurance.icon
-                    size={18}
-                    weight="light"
-                    aria-hidden="true"
-                    className="mt-0.5 shrink-0 text-brand-700"
-                  />
+                  <IconBadge size="sm" className="mt-px">
+                    <assurance.icon size={16} weight="light" />
+                  </IconBadge>
                   <span className="text-body-sm text-neutral-700">
                     {assurance.text}
                   </span>

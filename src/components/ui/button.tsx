@@ -80,7 +80,7 @@ const SIZE: Record<ButtonSize, string> = {
  */
 const SIZE_PADDING: Record<ButtonSize, { withIcon: string; plain: string }> = {
   md: { withIcon: 'pl-6 pr-2', plain: 'px-6' },
-  lg: { withIcon: 'pl-8 pr-2.5', plain: 'px-8' },
+  lg: { withIcon: 'pl-6 pr-2 sm:pl-8 sm:pr-2.5', plain: 'px-6 sm:px-8' },
 };
 
 const ICON_WRAPPER_SIZE: Record<ButtonSize, string> = {

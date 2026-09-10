@@ -1,5 +1,5 @@
 import { absoluteUrl, company, regularOpeningHours } from '@/config/company';
-import { serviceHref, services } from '@/content/services';
+import { categoryAnchorHref, serviceCategories } from '@/content/services';
 
 import { BUSINESS_ID, serviceNodeId } from './schema';
 
@@ -32,9 +32,18 @@ import { BUSINESS_ID, serviceNodeId } from './schema';
  * markup with no execution and belongs in the initial HTML, where crawlers
  * read it without running JavaScript. Same idiom as `FaqJsonLd`.
  *
- * The node ids come from `./schema`, which the `/leistungen/[slug]` pages use
- * as well. A service described here and described again on its own page has to
- * carry the same `@id`, or Google reads one offering as two.
+ * ## Shape of the offer catalogue
+ *
+ * Five `Service` nodes, one per category, each listing its individual services
+ * as an `OfferCatalog` of its own (CLAUDE.md 7a). The alternative — eighteen
+ * flat `Service` nodes — would describe the business as eighteen unrelated
+ * offerings and would not match the page, where the individual services only
+ * ever appear inside their category. `hasOfferCatalog` nests, so the two-level
+ * catalogue survives into the graph instead of being flattened out of it.
+ *
+ * Node ids come from `./schema` and resolve to the landing-page anchor that
+ * renders the same category, because that anchor is now the canonical location
+ * of the offering.
  */
 
 function buildSchema() {
@@ -82,32 +91,40 @@ function buildSchema() {
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Leistungen',
-      itemListElement: services.map((service) => ({
+      itemListElement: serviceCategories.map((category) => ({
         '@type': 'Offer',
-        itemOffered: { '@id': serviceNodeId(service.slug) },
+        itemOffered: { '@id': serviceNodeId(category.slug) },
       })),
     },
   };
 
-  /*
-   * TODO (client, CLAUDE.md 12): the service catalogue itself is unconfirmed.
-   * These nodes advertise the same eight services the bento renders, so they
-   * are consistent with the page — but page and schema have to be signed off
-   * together, not separately.
-   */
-  const serviceNodes = services.map((service) => ({
+  const serviceNodes = serviceCategories.map((category) => ({
     '@type': 'Service',
-    '@id': serviceNodeId(service.slug),
-    // The detail page is the canonical description of the service; this node
-    // is the short version of it, so it points there rather than at itself.
-    url: absoluteUrl(serviceHref(service.slug)),
-    name: service.name,
-    description: service.benefit,
-    serviceType: service.name,
+    '@id': serviceNodeId(category.slug),
+    url: absoluteUrl(categoryAnchorHref(category.anchor, { absolute: true })),
+    name: category.category,
+    description: category.blurb,
+    serviceType: category.category,
     provider: { '@id': BUSINESS_ID },
     areaServed: {
       '@type': 'Place',
       name: company.serviceArea.primary,
+    },
+    // The individual services, nested under the category rather than hoisted
+    // to the top level. `name` is read straight from the catalogue, so
+    // "Winterdienst (Räum- und Streupflicht)" reaches the graph with its
+    // qualifier intact — the same string the bento chip shows.
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: category.category,
+      itemListElement: category.items.map((item) => ({
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: item.name,
+          provider: { '@id': BUSINESS_ID },
+        },
+      })),
     },
   }));
 

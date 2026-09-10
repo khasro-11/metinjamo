@@ -25,12 +25,13 @@
 
 import { z } from 'zod';
 
-import { services, type ServiceSlug } from '@/content/services';
-
-/** Every slug in the catalogue — the accepted values of `services`. */
-export const SERVICE_SLUGS: readonly ServiceSlug[] = services.map(
-  (service) => service.slug,
-);
+import {
+  getCategoryOfItem,
+  SERVICE_CATEGORY_SLUGS,
+  SERVICE_ITEM_SLUGS,
+  type ServiceCategorySlug,
+  type ServiceItemSlug,
+} from '@/content/services';
 
 /**
  * Optional free text. Empty string is the "not provided" value rather than
@@ -51,9 +52,22 @@ export function hasValue(value: string | undefined): value is string {
 }
 
 export const quoteRequestSchema = z.object({
-  services: z
-    .array(z.enum(SERVICE_SLUGS as ServiceSlug[]))
-    .min(1, { error: 'Bitte wählen Sie mindestens eine Leistung aus.' }),
+  /*
+   * Step one is two-stage (CLAUDE.md 7a): the visitor picks categories, and
+   * picking one opens its individual services.
+   *
+   * The category is the required answer and the individual services are an
+   * optional refinement, not the other way round. That is a deliberate call
+   * about what this form is for: a Hausverwaltung that wants Gebäudereinigung
+   * should not have to tick four boxes to say so, and the actual scope is
+   * settled at the Besichtigung anyway. Requiring the leaf level would cost
+   * leads to buy a precision the quote does not depend on.
+   */
+  serviceCategories: z
+    .array(z.enum(SERVICE_CATEGORY_SLUGS as ServiceCategorySlug[]))
+    .min(1, { error: 'Bitte wählen Sie mindestens einen Bereich aus.' }),
+
+  services: z.array(z.enum(SERVICE_ITEM_SLUGS as ServiceItemSlug[])),
 
   frequency: z.enum(
     [
@@ -112,7 +126,32 @@ export const quoteRequestSchema = z.object({
     error:
       'Bitte bestätigen Sie, dass Sie die Datenschutzerklärung zur Kenntnis genommen haben.',
   }),
-});
+})
+  /*
+   * An individual service may only arrive with its category.
+   *
+   * The UI cannot produce a violation — the checkboxes for a category's
+   * services are only rendered once that category is selected, and
+   * deselecting it clears them. This is the server's own check on the same
+   * rule, because the route handler validates the raw body and a hand-crafted
+   * POST is not bound by what the form renders. Without it the confirmation
+   * mail could list a service under a category the sender never chose.
+   */
+  .refine(
+    (value) =>
+      value.services.every((slug) => {
+        const category = getCategoryOfItem(slug);
+        return (
+          category !== undefined &&
+          value.serviceCategories.includes(category.slug)
+        );
+      }),
+    {
+      path: ['services'],
+      error:
+        'Bitte wählen Sie zuerst den Bereich aus, zu dem die Leistung gehört.',
+    },
+  );
 
 export type QuoteRequest = z.infer<typeof quoteRequestSchema>;
 
@@ -213,7 +252,8 @@ export function propertyTypeLabel(value: PropertyType | undefined): string {
  * option — pre-selecting one would submit an answer the user never gave.
  */
 export const emptyQuoteRequest = {
-  services: [] as ServiceSlug[],
+  serviceCategories: [] as ServiceCategorySlug[],
+  services: [] as ServiceItemSlug[],
   frequency: undefined as Frequency | undefined,
   propertyType: undefined as PropertyType | undefined,
   postalCode: '',
@@ -253,8 +293,8 @@ export const quoteSteps: readonly QuoteStep[] = [
     title: 'Welche Leistungen brauchen Sie?',
     shortLabel: 'Leistungen',
     description:
-      'Mehrfachauswahl. Sie legen sich damit noch nicht fest — der Umfang wird am Objekt bestimmt.',
-    fields: ['services'],
+      'Wählen Sie einen oder mehrere Bereiche. Zu jedem Bereich können Sie danach einzelne Leistungen angeben, müssen es aber nicht.',
+    fields: ['serviceCategories', 'services'],
   },
   {
     id: 'turnus',

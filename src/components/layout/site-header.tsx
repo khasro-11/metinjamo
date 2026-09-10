@@ -17,6 +17,13 @@ import { MobileMenu } from './mobile-menu';
 /** Scroll distance over which the pill settles into its denser state, in px. */
 const SETTLE_DISTANCE = 72;
 
+/**
+ * Hairline separator, drawn as a gradient so it fades out at both ends instead
+ * of butting into the pill's padding.
+ */
+const DIVIDER_CLASSES =
+  'h-6 w-px shrink-0 bg-gradient-to-b from-transparent via-ink/12 to-transparent';
+
 function isActive(pathname: string, href: string): boolean {
   // Anchors point at sections of a page, never at a page — they are never the
   // "current page" for the purposes of aria-current.
@@ -27,6 +34,12 @@ function isActive(pathname: string, href: string): boolean {
 /**
  * Floating glass pill, offset from the top edge and centred on its own width —
  * not an edge-to-edge sticky bar.
+ *
+ * Reading order: the mark on the left, then the menu, then the two contact
+ * actions, with the burger taking the far right below `lg`. DOM order matches
+ * that visual order at every breakpoint — the burger is placed last in the
+ * markup rather than reordered visually, so the tab sequence never disagrees
+ * with what the eye follows.
  *
  * The sticky element keeps its top padding while pinned, so the pill stays
  * clear of the viewport edge instead of snapping flush on the first scroll.
@@ -78,22 +91,27 @@ export function SiteHeader() {
             href="/"
             aria-label={LOGO_LINK_LABEL}
             className={cn(
-              'flex shrink-0 items-center rounded-pill py-2.5 pr-1',
+              'flex min-w-11 shrink-0 items-center rounded-pill py-[0.4375rem] pr-1',
               'focus-visible:outline-2 focus-visible:outline-offset-4',
               'focus-visible:outline-brand-500',
             )}
           >
-            <Logo variant="mark" height={30} priority className="lg:hidden" />
+            {/* 36px of art + 2 x 0.4375rem of padding = a 50px link, which is
+                exactly the 3.125rem the hero's HEADER_SPACE reserves for the
+                tallest pill child. Growing the mark therefore costs padding,
+                not pill height — the alternative is editing a magic number in
+                two files and re-deriving the hero's negative top margin. */}
+            <Logo variant="mark" height={36} priority className="lg:hidden" />
             <Logo
               variant="wordmark"
-              height={26}
+              height={36}
               priority
               className="hidden lg:block"
             />
           </Link>
 
           <nav aria-label="Hauptnavigation" className="hidden lg:block">
-            <ul className="flex items-center gap-1 px-3">
+            <ul className="flex items-center gap-1">
               {primaryNav.map((item) => {
                 const active = isActive(pathname, item.href);
 
@@ -120,12 +138,7 @@ export function SiteHeader() {
             </ul>
           </nav>
 
-          {/* Hairline separator, drawn as a gradient so it fades out at both
-              ends instead of butting into the pill's padding. */}
-          <span
-            aria-hidden="true"
-            className="hidden h-6 w-px shrink-0 bg-gradient-to-b from-transparent via-ink/12 to-transparent lg:block"
-          />
+          <span aria-hidden="true" className={cn('hidden lg:block', DIVIDER_CLASSES)} />
 
           <a
             href={company.phone.href}

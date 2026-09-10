@@ -17,7 +17,8 @@ import { cn } from '@/lib/cn';
  * that is obviously still Imperial, with the phone number one tap away.
  *
  * Every destination below is a route that exists TODAY. `/leistungen`,
- * `/ueber-uns` and `/kontakt` are still unbuilt (see config/navigation.ts), and
+ * `/ueber-uns` and `/kontakt` are still unbuilt (see config/navigation.ts —
+ * the header links at their landing-page sections until they are), and
  * sending a visitor from one 404 to another is the one thing this page must not
  * do — so the service and contact links point at the landing-page anchors until
  * those routes ship.

@@ -6,7 +6,7 @@ import { PhoneIncomingIcon } from '@phosphor-icons/react/dist/ssr/PhoneIncoming'
 import { SirenIcon } from '@phosphor-icons/react/dist/ssr/Siren';
 import Link from 'next/link';
 
-import { Bezel, Eyebrow, Reveal, WindowMark } from '@/components/ui';
+import { Bezel, Eyebrow, IconBadge, Reveal, WindowMark } from '@/components/ui';
 import { company } from '@/config/company';
 import { primaryCta } from '@/config/navigation';
 import { cn } from '@/lib/cn';
@@ -260,12 +260,9 @@ function AvailabilityPanel() {
             boxShadow: 'inset 0 1px 0 0 rgb(20 84 126 / 0.12)',
           }}
         >
-          <SirenIcon
-            size={22}
-            weight="light"
-            aria-hidden="true"
-            className="mt-0.5 shrink-0 text-brand-700"
-          />
+          <IconBadge size="md">
+            <SirenIcon size={20} weight="light" />
+          </IconBadge>
 
           <div>
             <p className="text-body-sm font-medium text-ink">
@@ -327,7 +324,7 @@ export function ContactChannels() {
     <section
       id="kontaktwege"
       aria-labelledby="kontaktwege-titel"
-      className="py-section md:py-section-lg"
+      className="bg-paper py-section md:py-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <header className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-14">
@@ -338,7 +335,8 @@ export function ContactChannels() {
 
             <Reveal delay={0.08}>
               <h2 id="kontaktwege-titel" className="mt-6 text-title-lg">
-                Lieber sprechen als tippen? Auch gut.
+                Lieber <span className="text-brand-700">sprechen</span> als tippen?
+                Auch gut.
               </h2>
             </Reveal>
           </div>

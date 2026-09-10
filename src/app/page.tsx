@@ -1,4 +1,5 @@
 import {
+  About,
   Advantages,
   ContactChannels,
   Faq,
@@ -29,6 +30,11 @@ export default function Home() {
       <ServicesBento />
       <ProcessSteps />
       <Advantages />
+      {/* Not in the CLAUDE.md 7 list, which predates this section. It sits
+          here on purpose: Advantages argues capability, this argues the people
+          behind it, and it is the last thing read before the form asks for a
+          name. Moving it, or lifting it onto /ueber-uns, is one line. */}
+      <About />
       <QuoteFormSection />
       <ContactChannels />
       <Faq />

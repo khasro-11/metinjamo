@@ -31,6 +31,21 @@
   --color-paper: #fbfcfd;
   --color-ink: #0f1b24;
 
+  /* The warm counterweight. Ten sections of one hue read as cold and flat, so
+     sand carries the sections whose subject is people rather than process.
+
+     Three tones, not two, and the third is not a preference. Measured against
+     every light surface on the site, sand-500 is 2.36:1 on paper, 2.17:1 on
+     brand-050 and 2.08:1 on sand-100 — below AA at every size, so it can never
+     be text on a light ground. It stays a surface, a tonal numeral and a
+     graphic detail. On ink it measures 7.22:1 and may be text.
+     sand-700 is the text-safe ochre: 5.29:1 on paper, 4.87:1 on brand-050,
+     4.67:1 on sand-100. AA everywhere, and the only warm tone an eyebrow or a
+     caption on a light section is allowed to use. */
+  --color-sand-100: #f3ede4;
+  --color-sand-500: #c9a227;
+  --color-sand-700: #856512;
+
   /* The one non-brand hue on the site, and it exists only to mark a form
      error. Never decorative, never a surface on its own: an error is always
      icon + text as well, so the colour is never the sole carrier of meaning.
@@ -201,6 +216,35 @@
   h4 {
     color: var(--color-ink);
     text-wrap: balance;
+    /* German compound nouns are the widest single tokens on this site:
+       "Unterhaltsreinigung", "Betriebshaftpflichtversicherung",
+       "Umsatzsteuer-Identifikationsnummer". At display sizes a single one of
+       them is wider than a 320px viewport minus its gutters, and with the
+       default `overflow-wrap: normal` the browser refuses to break it. The
+       measured result was a document 402px wide inside a 320px viewport on
+       /leistungen/[slug] and a headline clipped mid-word by the bento tile's
+       own `overflow: hidden`. This is the floor that stops both. */
+    overflow-wrap: break-word;
+  }
+
+  /* Below `md` the measure gets short enough that German needs real
+     hyphenation, not just an emergency break. `lang="de"` is set on <html>,
+     so the browser uses German patterns and breaks
+     "Un-ter-halts-rei-ni-gung" with a visible hyphen instead of chopping the
+     word at an arbitrary letter. Left off above `md`: the columns are wide
+     enough there that hyphenation would only add rag noise. */
+  @media (max-width: 47.9375rem) {
+    h1,
+    h2,
+    h3,
+    h4,
+    p,
+    dt,
+    dd,
+    li,
+    address {
+      hyphens: auto;
+    }
   }
 
   p {
@@ -212,6 +256,28 @@
   time,
   [data-numeric] {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Film grain. A single fixed pseudo-element over the whole viewport, never
+     attached to a scrolling container, so the browser rasterises the noise
+     once instead of repainting it on every scroll frame (CLAUDE.md 9).
+
+     It exists because the palette runs from #FBFCFD to #F3EDE4 across four of
+     the eleven sections, and flat fills that bright read as sterile on a large
+     display. At 3.5% the texture is not visible as texture, it only stops the
+     large surfaces from looking like untouched paint.
+
+     Sits above the sticky header (z-50) and below the skip link (z-60), so the
+     first tab stop is never veiled. `pointer-events: none` keeps every control
+     underneath it clickable. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   }
 
   ::selection {

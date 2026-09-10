@@ -17,9 +17,9 @@ import { LOGO_LINK_LABEL, Logo } from './logo';
  * sitemap dump, not as a footer.
  */
 const LINK_CLASS = cn(
-  'inline-flex text-body-sm text-neutral-700 underline-offset-4',
+  'inline-flex min-h-11 items-center text-body-sm text-brand-050 underline-offset-4',
   'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
-  'hover:text-brand-900 hover:underline',
+  'hover:text-brand-300 hover:underline',
   'focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-brand-500',
 );
 
@@ -31,7 +31,7 @@ const LINK_CLASS = cn(
  */
 function ColumnHeading({ children }: { children: ReactNode }) {
   return (
-    <h2 className="flex items-center gap-2 text-eyebrow uppercase text-brand-700">
+    <h2 className="flex items-center gap-2 text-eyebrow uppercase text-brand-300">
       <WindowMark className="text-brand-300" />
       <span className="-mr-[0.2em]">{children}</span>
     </h2>
@@ -50,7 +50,7 @@ function ContactRow({
     <div className="flex gap-3">
       <span
         aria-hidden="true"
-        className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-white text-brand-700 shadow-[var(--shadow-hairline-brand)]"
+        className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-white/[0.08] text-brand-300 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.10)]"
       >
         {icon}
       </span>
@@ -66,6 +66,16 @@ function ContactRow({
  * from `company.ts`. That is what keeps the footer, the imprint and the Google
  * Business Profile telling the same story, which is both a legal and a local
  * SEO requirement.
+ *
+ * Ink ground, closing the section rhythm from CLAUDE.md 5.9: the page steps
+ * from the brand-900 Abschluss-CTA into the darkest surface it has, so the
+ * bottom of the page reads as an end rather than as one more band. Measured on
+ * ink: paper 17.00:1, brand-050 16.4:1, brand-300 7.36:1, neutral-400 5.35:1.
+ * brand-700, which carried the column headings and the inline accents while
+ * the footer was brand-050, drops to 2.2:1 here and is gone from this file.
+ *
+ * The top margin is gone with it. The Abschluss-CTA now carries its own bottom
+ * padding, because a filled band cannot end at its text.
  *
  * Server component: no state, no motion, nothing to hydrate.
  */
@@ -84,8 +94,8 @@ export function SiteFooter() {
 
   return (
     <footer
-      className="mt-section bg-brand-050/45 md:mt-section-lg"
-      style={{ boxShadow: 'inset 0 1px 0 0 rgb(20 84 126 / 0.1)' }}
+      className="bg-ink"
+      style={{ boxShadow: 'inset 0 1px 0 0 rgb(255 255 255 / 0.10)' }}
     >
       <div className="mx-auto max-w-shell px-6 py-section md:px-10 md:py-section-md">
         {/* Asymmetric on purpose — the brand and contact columns carry more
@@ -97,21 +107,24 @@ export function SiteFooter() {
               aria-label={LOGO_LINK_LABEL}
               className="self-start rounded-bezel-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-500"
             >
-              <Logo variant="wordmark" height={30} />
+              {/* Larger than in the header: the pill rations vertical space,
+                  the footer's brand column does not, and this is the block
+                  that has to read as the signature of the page. */}
+              <Logo variant="wordmark" tone="white" height={46} />
             </Link>
 
-            <p className="max-w-copy text-body text-neutral-700">
+            <p className="max-w-copy text-body text-brand-050">
               Gebäudeservice für Hausverwaltungen, Gewerbeobjekte und
               Eigentümer.
             </p>
 
-            <p className="max-w-copy text-body-sm text-neutral-500">
+            <p className="max-w-copy text-body-sm text-neutral-400">
               {company.serviceArea.sentence}
             </p>
 
             {/* A verified fact from company.ts, not a marketing promise —
                 the one trust signal in the footer that is actually provable. */}
-            <p className="max-w-copy text-micro text-neutral-500">
+            <p className="max-w-copy text-micro text-neutral-400">
               {company.liabilityInsurance.type} mit{' '}
               {company.liabilityInsurance.coverage}.
             </p>
@@ -119,7 +132,7 @@ export function SiteFooter() {
 
           <nav aria-label="Footer-Navigation" className="flex flex-col gap-5">
             <ColumnHeading>Menü</ColumnHeading>
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-0.5">
               {primaryNav.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className={LINK_CLASS}>
@@ -130,11 +143,12 @@ export function SiteFooter() {
             </ul>
           </nav>
 
-          {/* TODO (client): catalogue unconfirmed — see `serviceNav` in
-              config/navigation.ts. Nothing here goes live before sign-off. */}
+          {/* One link per category, not per individual service: eighteen rows
+              here would be a sitemap dump. Each resolves to a bento tile
+              anchor on the landing page (CLAUDE.md 7a). */}
           <nav aria-label="Leistungen" className="flex flex-col gap-5">
             <ColumnHeading>Leistungen</ColumnHeading>
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-0.5">
               {serviceNav.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className={LINK_CLASS}>
@@ -152,7 +166,7 @@ export function SiteFooter() {
               <ContactRow
                 icon={<MapPinIcon size={15} weight="light" />}
               >
-                <address className="text-body-sm not-italic text-neutral-700">
+                <address className="text-body-sm not-italic text-brand-050">
                   {company.address.street}
                   <br />
                   {company.address.postalCode} {company.address.city}
@@ -181,21 +195,21 @@ export function SiteFooter() {
             <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-5 gap-y-1.5 text-body-sm">
               {scheduled.map((entry) => (
                 <div key={entry.daysLabel} className="col-span-2 grid grid-cols-subgrid">
-                  <dt className="text-neutral-500">{entry.daysLabel}</dt>
-                  <dd className="text-neutral-700">{entry.timeLabel}</dd>
+                  <dt className="text-neutral-400">{entry.daysLabel}</dt>
+                  <dd className="text-brand-050">{entry.timeLabel}</dd>
                 </div>
               ))}
             </dl>
 
             {emergency ? (
-              <p className="max-w-copy text-micro text-neutral-500">
-                <span className="text-brand-700">{emergency.daysLabel}:</span>{' '}
+              <p className="max-w-copy text-micro text-neutral-400">
+                <span className="text-brand-300">{emergency.daysLabel}:</span>{' '}
                 {emergency.timeLabel}
               </p>
             ) : null}
 
-            <p className="max-w-copy text-micro text-neutral-500">
-              <span className="text-brand-700">Einsatzgebiet:</span>{' '}
+            <p className="max-w-copy text-micro text-neutral-400">
+              <span className="text-brand-300">Einsatzgebiet:</span>{' '}
               {company.serviceArea.primary}. {company.serviceArea.note}
             </p>
           </div>
@@ -203,9 +217,9 @@ export function SiteFooter() {
 
         <div
           className="mt-16 flex flex-col gap-4 pt-8 sm:flex-row sm:items-center sm:justify-between"
-          style={{ boxShadow: 'inset 0 1px 0 0 rgb(20 84 126 / 0.1)' }}
+          style={{ boxShadow: 'inset 0 1px 0 0 rgb(255 255 255 / 0.10)' }}
         >
-          <p className="text-micro text-neutral-500">
+          <p className="text-micro text-neutral-400">
             © {year} {company.legalName}
           </p>
 
@@ -216,9 +230,10 @@ export function SiteFooter() {
                   <Link
                     href={item.href}
                     className={cn(
-                      'text-micro text-neutral-500 underline-offset-4',
+                      'inline-flex min-h-11 items-center',
+                      'text-micro text-neutral-400 underline-offset-4',
                       'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
-                      'hover:text-brand-900 hover:underline',
+                      'hover:text-brand-300 hover:underline',
                       'focus-visible:outline-2 focus-visible:outline-offset-3',
                       'focus-visible:outline-brand-500',
                     )}

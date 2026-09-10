@@ -255,7 +255,7 @@ export function Advantages() {
     <section
       id="warum-imperial"
       aria-labelledby="warum-imperial-titel"
-      className="py-section md:py-section-lg"
+      className="bg-paper py-section md:py-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-x-14 xl:gap-x-20">
@@ -268,7 +268,8 @@ export function Advantages() {
 
             <Reveal delay={0.08}>
               <h2 id="warum-imperial-titel" className="mt-6 text-title-lg">
-                Warum Kunden sich für Imperial entscheiden.
+                Warum Kunden sich für{' '}
+                <span className="text-brand-700">Imperial</span> entscheiden.
               </h2>
             </Reveal>
 

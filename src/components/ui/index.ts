@@ -16,8 +16,11 @@ export type { CallButtonProps } from './call-button';
 export { Entrance } from './entrance';
 export type { EntranceProps, EntranceTag } from './entrance';
 
+export { IconBadge } from './icon-badge';
+export type { IconBadgeProps, IconBadgeSize, IconBadgeTone } from './icon-badge';
+
 export { Eyebrow } from './eyebrow';
-export type { EyebrowProps, EyebrowVariant } from './eyebrow';
+export type { EyebrowProps, EyebrowTone, EyebrowVariant } from './eyebrow';
 
 export { Reveal } from './reveal';
 export type { RevealProps, RevealTag } from './reveal';
