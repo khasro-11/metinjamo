@@ -129,7 +129,7 @@ export function TrustBar() {
          evidenced, not a new topic. The bottom is the standard section
          boundary, so the step into Leistungen is the same size as every other
          step down the page. */
-      className="bg-paper pt-16 pb-section md:pt-20 md:pb-section-lg"
+      className="bg-white pt-16 pb-section md:pt-20 md:pb-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <h2 id="vertrauen-titel" className="sr-only">
@@ -142,7 +142,7 @@ export function TrustBar() {
           className="h-px w-full"
           style={{
             backgroundImage:
-              'linear-gradient(90deg, transparent, rgb(15 27 36 / 0.10) 18%, rgb(15 27 36 / 0.10) 82%, transparent)',
+              'linear-gradient(90deg, transparent, rgb(20 18 58 / 0.10) 18%, rgb(20 18 58 / 0.10) 82%, transparent)',
           }}
         />
 
@@ -179,7 +179,7 @@ export function TrustBar() {
             className="mt-14 h-px w-full"
             style={{
               backgroundImage:
-                'linear-gradient(90deg, transparent, rgb(15 27 36 / 0.10) 18%, rgb(15 27 36 / 0.10) 82%, transparent)',
+                'linear-gradient(90deg, transparent, rgb(20 18 58 / 0.10) 18%, rgb(20 18 58 / 0.10) 82%, transparent)',
             }}
           />
         */}

@@ -17,7 +17,13 @@ export type BezelInset = 'sm' | 'md' | 'lg';
  * to 2.42:1 on a raised core, so on these tones it is a graphic tone only,
  * never text.
  */
-export type BezelTone = 'paper' | 'tinted' | 'ink' | 'inkPlate' | 'inkRaised';
+export type BezelTone =
+  | 'paper'
+  | 'tinted'
+  | 'accent'
+  | 'ink'
+  | 'inkPlate'
+  | 'inkRaised';
 export type BezelElevation = 'flat' | 'sm' | 'md' | 'lg' | 'xl';
 
 export interface BezelProps {
@@ -73,6 +79,7 @@ const SHELL_AMBIENT: Record<BezelElevation, string | null> = {
 
 const SHELL_RING: Record<BezelTone, string> = {
   paper: 'var(--shadow-hairline)',
+  accent: 'inset 0 0 0 1px rgb(20 18 58 / 0.14)',
   tinted: 'var(--shadow-hairline-brand)',
   ink: 'inset 0 0 0 1px rgb(255 255 255 / 0.12)',
   inkPlate: 'inset 0 0 0 1px rgb(255 255 255 / 0.10)',
@@ -95,6 +102,8 @@ const SHELL_RING: Record<BezelTone, string> = {
  */
 const SHELL_SURFACE: Record<BezelTone, string> = {
   paper: 'bg-brand-900/[0.045]',
+  /* A deeper cut of its own core, so the frame reads on the fill. */
+  accent: 'bg-accent-yellow-ink/25',
   tinted: 'bg-brand-900/[0.09]',
   ink: 'bg-brand-900',
   inkPlate: 'bg-white/[0.09]',
@@ -103,6 +112,7 @@ const SHELL_SURFACE: Record<BezelTone, string> = {
 
 const CORE_RING: Record<BezelTone, string> = {
   paper: 'var(--shadow-bevel), var(--shadow-hairline)',
+  accent: 'inset 0 1px 0 0 rgb(255 255 255 / 0.45)',
   tinted: 'var(--shadow-bevel)',
   ink: 'inset 0 0 0 1px rgb(255 255 255 / 0.08)',
   // The bevel on the light tones is a white top edge. On a dark ground the
@@ -113,6 +123,8 @@ const CORE_RING: Record<BezelTone, string> = {
 
 const CORE_SURFACE: Record<BezelTone, string> = {
   paper: 'bg-white',
+  /* Navy on accent-yellow is 12.03:1 — AAA at any size. */
+  accent: 'bg-accent-yellow text-navy',
   tinted: 'bg-white/70',
   ink: 'bg-brand-900 text-paper',
   inkPlate: 'bg-brand-900 text-paper',

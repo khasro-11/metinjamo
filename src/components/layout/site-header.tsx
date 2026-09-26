@@ -1,28 +1,14 @@
 'use client';
 
-import { PhoneIcon } from '@phosphor-icons/react/dist/ssr/Phone';
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { CSSProperties } from 'react';
 
 import { Button } from '@/components/ui';
-import { company } from '@/config/company';
 import { primaryCta, primaryNav } from '@/config/navigation';
 import { cn } from '@/lib/cn';
 
 import { LOGO_LINK_LABEL, Logo } from './logo';
 import { MobileMenu } from './mobile-menu';
-
-/** Scroll distance over which the pill settles into its denser state, in px. */
-const SETTLE_DISTANCE = 72;
-
-/**
- * Hairline separator, drawn as a gradient so it fades out at both ends instead
- * of butting into the pill's padding.
- */
-const DIVIDER_CLASSES =
-  'h-6 w-px shrink-0 bg-gradient-to-b from-transparent via-ink/12 to-transparent';
 
 function isActive(pathname: string, href: string): boolean {
   // Anchors point at sections of a page, never at a page — they are never the
@@ -32,86 +18,58 @@ function isActive(pathname: string, href: string): boolean {
 }
 
 /**
- * Floating glass pill, offset from the top edge and centred on its own width —
- * not an edge-to-edge sticky bar.
+ * Flat site header: logo left, links right, outline CTA at the end.
  *
- * Reading order: the mark on the left, then the menu, then the two contact
- * actions, with the burger taking the far right below `lg`. DOM order matches
- * that visual order at every breakpoint — the burger is placed last in the
- * markup rather than reordered visually, so the tab sequence never disagrees
- * with what the eye follows.
+ * ## What changed, and what it costs
  *
- * The sticky element keeps its top padding while pinned, so the pill stays
- * clear of the viewport edge instead of snapping flush on the first scroll.
- * `backdrop-blur` is confined to this element and to the mobile overlay: both
- * are taken out of scroll flow, so the blur is rasterised once rather than on
- * every scrolled frame.
+ * This replaces the floating glass pill from CLAUDE.md 5.5, on the client's
+ * instruction and after the reference design. Three consequences worth
+ * knowing:
  *
- * A client leaf by necessity — scroll progress, the burger morph and the
- * overlay all need the browser. It pulls its data from static config, so
- * nothing but the interaction crosses the boundary.
+ * 1. The logo is now on the LEFT, sharing the hero's container and gutters,
+ *    so it sits flush with the left edge of the headline. 5.5 asks for the
+ *    logo on the right; the reference puts it on the left and so does this.
+ * 2. The bar is in the flow rather than `sticky`, because a flat bar "im
+ *    selben Container wie der Hero-Inhalt" is a bar that scrolls away with
+ *    the hero. That means the primary CTA is only reachable at the top of
+ *    the page. Making it sticky again is adding `sticky top-0 z-50 bg-white`
+ *    to the `<header>`; nothing else here assumes one or the other.
+ * 3. With no dark ground to sit on, the two-state glass and the white logo
+ *    cut are gone, along with the scroll listener that drove them. The
+ *    header no longer reads scroll position at all.
+ *
+ * Still a client component, but now only because `usePathname` decides which
+ * link is the current page and because the mobile overlay lives here.
  */
 export function SiteHeader() {
   const pathname = usePathname();
-  const prefersReducedMotion = useReducedMotion();
-  const { scrollY } = useScroll();
 
-  // Scroll drives opacity on a separate layer rather than mutating the pill's
-  // own background or shadow — opacity composites, a shadow repaints.
-  const settledOpacity = useTransform(scrollY, [0, SETTLE_DISTANCE], [0, 1]);
-
+  // The bar carries no background of its own. It is in the flow, so it sits
+  // on whatever section is behind it; a white fill left a visible seam on the
+  // legal pages, whose ground is paper (#fbfcfd) rather than white.
   return (
-    <header className="pointer-events-none sticky top-0 z-50 pt-6 pb-3">
-      <div
-        className={cn(
-          'imp-bezel pointer-events-auto relative mx-auto w-max max-w-[calc(100%-2rem)]',
-          'bg-white/55 backdrop-blur-xl',
-        )}
-        style={
-          {
-            '--bezel-radius': 'var(--radius-pill)',
-            '--bezel-inset': 'var(--bezel-inset-sm)',
-            boxShadow: 'var(--shadow-ambient-sm), var(--shadow-hairline)',
-          } as CSSProperties
-        }
-      >
-        {/* The settled state, faded in on scroll. Denser glass, deeper
-            ambient shadow — the pill reads as lifting off the page. */}
-        <motion.span
-          aria-hidden="true"
-          className="absolute inset-0 rounded-pill bg-white/45"
-          style={{
-            opacity: prefersReducedMotion ? 1 : settledOpacity,
-            boxShadow: 'var(--shadow-ambient-md), var(--shadow-hairline-brand)',
-          }}
-        />
-
-        <div className="imp-bezel-core relative flex items-center gap-2 bg-white/40 pl-4 pr-1.5 shadow-[var(--shadow-bevel)] sm:pl-5">
+    <header className="w-full">
+      <div className="mx-auto w-full max-w-shell px-6 md:px-10">
+        <div className="flex h-20 items-center justify-between gap-6 md:h-24">
+          {/* Flush with the left edge of the hero headline, because the
+              header shares the hero's container and its gutters. */}
           <Link
             href="/"
             aria-label={LOGO_LINK_LABEL}
             className={cn(
-              'flex min-w-11 shrink-0 items-center rounded-pill py-[0.4375rem] pr-1',
+              'flex shrink-0 items-center rounded-[1rem] py-2',
               'focus-visible:outline-2 focus-visible:outline-offset-4',
-              'focus-visible:outline-brand-500',
+              'focus-visible:outline-navy',
             )}
           >
-            {/* 36px of art + 2 x 0.4375rem of padding = a 50px link, which is
-                exactly the 3.125rem the hero's HEADER_SPACE reserves for the
-                tallest pill child. Growing the mark therefore costs padding,
-                not pill height — the alternative is editing a magic number in
-                two files and re-deriving the hero's negative top margin. */}
-            <Logo variant="mark" height={36} priority className="lg:hidden" />
-            <Logo
-              variant="wordmark"
-              height={36}
-              priority
-              className="hidden lg:block"
-            />
+            <Logo variant="wordmark" height={38} priority />
           </Link>
 
-          <nav aria-label="Hauptnavigation" className="hidden lg:block">
-            <ul className="flex items-center gap-1">
+          <nav
+            aria-label="Hauptnavigation"
+            className="hidden items-center gap-8 lg:flex xl:gap-10"
+          >
+            <ul className="flex items-center gap-8 xl:gap-10">
               {primaryNav.map((item) => {
                 const active = isActive(pathname, item.href);
 
@@ -121,13 +79,12 @@ export function SiteHeader() {
                       href={item.href}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'inline-flex h-11 items-center rounded-pill px-3.5 text-body-sm',
+                        'inline-flex h-11 items-center rounded-[0.75rem] text-body text-navy',
                         'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2',
-                        'focus-visible:outline-brand-500',
-                        active
-                          ? 'bg-brand-050 text-brand-900'
-                          : 'text-neutral-700 hover:bg-brand-050/70 hover:text-brand-900',
+                        'hover:text-accent-sky-ink',
+                        'focus-visible:outline-2 focus-visible:outline-offset-4',
+                        'focus-visible:outline-navy',
+                        active && 'text-accent-sky-ink',
                       )}
                     >
                       {item.label}
@@ -136,47 +93,24 @@ export function SiteHeader() {
                 );
               })}
             </ul>
-          </nav>
 
-          <span aria-hidden="true" className={cn('hidden lg:block', DIVIDER_CLASSES)} />
-
-          <a
-            href={company.phone.href}
-            className={cn(
-              'hidden h-11 shrink-0 items-center gap-2.5 rounded-pill px-3.5 text-body-sm',
-              'text-neutral-700 transition-colors duration-[var(--duration-swift)]',
-              'ease-imperial-soft hover:bg-brand-050/70 hover:text-brand-900',
-              'focus-visible:outline-2 focus-visible:outline-offset-2',
-              'focus-visible:outline-brand-500 lg:inline-flex',
-            )}
-          >
-            <PhoneIcon size={16} weight="light" aria-hidden="true" />
-            <span data-numeric>{company.phone.display}</span>
-          </a>
-
-          {/* Compact call target below lg, where the number itself would blow
-              the pill past the viewport. */}
-          <a
-            href={company.phone.href}
-            className={cn(
-              'grid size-11 shrink-0 place-items-center rounded-full text-brand-900',
-              'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
-              'hover:bg-brand-050 focus-visible:outline-2 focus-visible:outline-offset-2',
-              'focus-visible:outline-brand-500 lg:hidden',
-            )}
-          >
-            <PhoneIcon size={19} weight="light" aria-hidden="true" />
-            <span className="sr-only">
-              Anrufen: {company.phone.display}
-            </span>
-          </a>
-
-          <span className="hidden sm:block">
-            <Button href={primaryCta.href} size="md" magnetic={false}>
+            {/* The outline pill, the reference's "Contact Us". Its ring is
+                navy at 17.84:1 on white, so the control's boundary clears
+                the 3:1 that WCAG 1.4.11 asks of it several times over. */}
+            <Button
+              href={primaryCta.href}
+              variant="navyOutline"
+              size="sm"
+              icon={null}
+              magnetic={false}
+            >
               {primaryCta.label}
             </Button>
-          </span>
+          </nav>
 
+          {/* Below lg the whole right-hand side is the burger. The phone
+              number that used to live in this bar is now in the hero, and
+              the overlay carries it as well. */}
           <MobileMenu className="lg:hidden" />
         </div>
       </div>

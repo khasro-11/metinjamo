@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google';
 
+import { ConsentManager } from '@/components/consent';
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { company } from '@/config/company';
 
@@ -16,6 +17,17 @@ const sans = Geist({
 
 const mono = Geist_Mono({
   variable: '--font-geist-mono',
+  subsets: ['latin'],
+  display: 'swap',
+});
+
+/**
+ * The hero headline only. Loaded as the variable face with no `weight`, so
+ * the whole 400 to 900 range is available from one file and the display
+ * weight can be tuned without a second request.
+ */
+const display = Playfair_Display({
+  variable: '--font-playfair',
   subsets: ['latin'],
   display: 'swap',
 });
@@ -64,26 +76,31 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="de" className={`${sans.variable} ${mono.variable}`}>
+    <html lang="de" className={`${sans.variable} ${mono.variable} ${display.variable}`}>
       <body className="flex min-h-[100dvh] flex-col">
-        {/* First tab stop on every page — the floating pill holds six focus
-            stops that a keyboard user should not have to walk past twice. */}
+        {/* First tab stop on every page — the header holds six focus stops
+            that a keyboard user should not have to walk past twice. */}
         <a
           href="#inhalt"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-1/2 focus:top-4 focus:z-[60] focus:-translate-x-1/2 focus:rounded-pill focus:bg-brand-900 focus:px-6 focus:py-3 focus:text-body-sm focus:text-paper"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-1/2 focus:top-4 focus:z-[60] focus:-translate-x-1/2 focus:rounded-pill focus:bg-navy focus:px-6 focus:py-3 focus:text-body-sm focus:text-paper"
         >
           Zum Inhalt springen
         </a>
 
         <SiteHeader />
 
-        {/* The header is sticky, so the page body has to own the remaining
-            height for the footer to sit at the bottom of short pages. */}
+        {/* The body owns the remaining height so the footer sits at the
+            bottom of short pages. */}
         <div id="inhalt" className="flex flex-1 flex-col">
           {children}
         </div>
 
         <SiteFooter />
+
+        {/* Last in the body, so the banner sits at the end of the reading and
+            tab order rather than in front of the page. It is not modal and
+            does not take focus — see the component comment. */}
+        <ConsentManager />
       </body>
     </html>
   );

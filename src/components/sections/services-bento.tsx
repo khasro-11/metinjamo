@@ -7,6 +7,7 @@ import { TruckIcon } from '@phosphor-icons/react/dist/ssr/Truck';
 import Image from 'next/image';
 
 import { Bezel, Eyebrow, IconBadge, Reveal } from '@/components/ui';
+import type { IconBadgeTone } from '@/components/ui';
 import type {
   ServiceCategoryItem,
   ServiceCategorySlug,
@@ -48,6 +49,17 @@ interface TileConfig {
   /** Grid placement from `md` up. Below 768px every tile is a full row. */
   readonly span: string;
   readonly layout: TileLayout;
+  /**
+   * Which of the hero's three capsule tones this tile's icon badge takes.
+   *
+   * The colour in this section used to come from a duotone over the
+   * photographs. It comes from the badges now, which is the hero's own logic:
+   * the picture is left alone and the frame around it carries the brand. The
+   * three categories the hero also shows keep the tone they have there, so a
+   * visitor who scrolls from the collage to the grid sees the same yellow on
+   * Gebäudereinigung and the same lilac on Hausmeisterservice.
+   */
+  readonly accent: IconBadgeTone;
   /**
    * Rendered width of this tile's photograph, per breakpoint.
    *
@@ -99,30 +111,35 @@ interface TileConfig {
  */
 const TILES: Record<ServiceCategorySlug, TileConfig> = {
   gebaeudereinigung: {
+    accent: 'dark',
     span: 'md:col-span-2 lg:col-span-4 lg:row-span-2',
     layout: 'flagship',
     sizes:
       '(min-width: 1024px) 756px, (min-width: 768px) calc(100vw - 5rem), calc(100vw - 3rem)',
   },
   'abbruch-sanierung': {
+    accent: 'sky',
     span: 'md:col-span-2 lg:col-span-2 lg:row-span-3',
     layout: 'column',
     sizes:
       '(min-width: 1024px) 360px, (min-width: 768px) calc(100vw - 5rem), calc(100vw - 3rem)',
   },
   'entruempelung-logistik': {
+    accent: 'lilac',
     span: 'lg:col-span-2',
     layout: 'standard',
     sizes:
       '(min-width: 1024px) 364px, (min-width: 768px) calc(50vw - 3.125rem), calc(100vw - 3rem)',
   },
   aussenbereich: {
+    accent: 'sky',
     span: 'lg:col-span-2',
     layout: 'standard',
     sizes:
       '(min-width: 1024px) 364px, (min-width: 768px) calc(50vw - 3.125rem), calc(100vw - 3rem)',
   },
   hausmeisterservice: {
+    accent: 'lilac',
     span: 'md:col-span-2 lg:col-span-6',
     layout: 'wide',
     // The one photograph that is not full tile width at lg: there it is an
@@ -184,143 +201,12 @@ const COPY_PADDING: Record<TileLayout, string> = {
   wide: 'p-7 md:p-9',
 };
 
-/** `filter: url(#…)` target for the photographs. Rendered once per section. */
-const DUOTONE_ID = 'imp-duotone-brand';
-
 /**
- * Brand grade: a duotone mixed back over the untouched photograph at 45 %.
+ * The individual services inside a category tile.
  *
- * This is a filter on the pixels, not a layer over them. There is no element
- * of any kind between the photograph and the viewer — no scrim, no wash, no
- * gradient, nothing translucent and nothing blue. That was checked in the
- * rendered DOM rather than assumed: every element in the page whose box
- * overlaps a photograph and paints anything at all was enumerated, and the
- * count is zero for all five.
- *
- * ## Why grade at all
- *
- * Five photographs from five different shoots: a lobby under warm artificial
- * light with an orange machine, grey concrete with hi-vis yellow, a yellow
- * van, sunlit green foliage, a white render facade. Ungraded they are five
- * unrelated colour worlds stacked in one grid, which is the thing the brief
- * asks to avoid. A hue rotation cannot fix it, because it moves every hue by
- * the same angle and so preserves exactly the differences that make the five
- * look unrelated.
- *
- * ## Why 45 % and not 100 %
- *
- * A full duotone collapses every pixel onto the line between brand-900 and
- * brand-300. It unifies perfectly and it also reads as a blue film laid over
- * the tiles, which is the one thing the client does not want. Mixing the
- * graded result back over the original at 45 % keeps the orange machine, the
- * yellow warning sign and the green lawn legible as themselves while pulling
- * the five towards one temperature. Photographs stay photographs; the grid
- * still reads as a series.
- *
- * Pipeline:
- *
- *   1. luma  = 0.2126 R + 0.7152 G + 0.0722 B, written to all three channels
- *   2. luma' = clamp(1.15 · luma − 0.07)
- *   3. duo   = shadow + luma' · (light − shadow)
- *   4. out   = 0.45 · duo + 0.55 · source
- *
- * Stage 2 is a mild contrast stretch. It used to be far stronger (1.4 and
- * −0.18), which was correct while the photograph sat under a 92 % scrim and
- * only its broadest shapes had to survive. Shown clean, that curve is simply
- * blown out.
- *
- * Stage 4 raises the brightest possible pixel well above brand-300, because
- * the source is no longer clamped away. That costs nothing here and it is
- * worth stating plainly: it is the reason the copy has its own opaque zone
- * instead of sitting on the picture. With type on the photograph this grade
- * would be unshippable; with the zones separated the grade is free to be
- * chosen on looks alone.
- *
- * brand-900 is (0.0784, 0.3294, 0.4941), brand-300 is (0.2706, 0.7020,
- * 0.9059), and the deltas in the third matrix are (0.1922, 0.3725, 0.4118).
- * The photographs are opaque JPEGs, so the arithmetic composite in stage 4
- * runs on alpha 1 throughout and premultiplication is a no-op.
- *
- * `color-interpolation-filters="sRGB"` is load-bearing: the SVG default is
- * linearRGB, which would apply the luma weights to linear-light values and
- * land somewhere other than the measured result. Every figure quoted here was
- * measured against this pipeline, in sRGB.
- */
-function DuotoneFilter() {
-  return (
-    <svg
-      aria-hidden="true"
-      focusable="false"
-      className="pointer-events-none absolute size-0 overflow-hidden"
-    >
-      <filter
-        id={DUOTONE_ID}
-        colorInterpolationFilters="sRGB"
-        x="0%"
-        y="0%"
-        width="100%"
-        height="100%"
-      >
-        <feColorMatrix
-          type="matrix"
-          values="0.2126 0.7152 0.0722 0 0
-                  0.2126 0.7152 0.0722 0 0
-                  0.2126 0.7152 0.0722 0 0
-                  0      0      0      1 0"
-        />
-        <feComponentTransfer>
-          <feFuncR type="linear" slope="1.15" intercept="-0.07" />
-          <feFuncG type="linear" slope="1.15" intercept="-0.07" />
-          <feFuncB type="linear" slope="1.15" intercept="-0.07" />
-        </feComponentTransfer>
-        <feColorMatrix
-          type="matrix"
-          values="0.192157 0 0 0 0.078431
-                  0.372549 0 0 0 0.329412
-                  0.411765 0 0 0 0.494118
-                  0        0 0 1 0"
-          result="duotone"
-        />
-        {/* out = 0.45 · duotone + 0.55 · source. The single number that
-            decides how blue the section reads; see the note above. */}
-        <feComposite
-          in="duotone"
-          in2="SourceGraphic"
-          operator="arithmetic"
-          k1="0"
-          k2="0.45"
-          k3="0.55"
-          k4="0"
-        />
-      </filter>
-    </svg>
-  );
-}
-
-/* ---------------------------------------------------------------------------
-   Individual services
-   --------------------------------------------------------------------------- */
-
-/**
- * The individual services of a category, as chips.
- *
- * This is what makes a category tile a claim rather than a heading: "Abbruch &
- * Sanierung" alone says nothing a competitor does not also say, and the six
- * chips under it are the specific answer. They are plain text, not links —
- * there is nothing to link to since the detail routes were retired
- * (CLAUDE.md 7a), and a chip that looks interactive but is not is worse than a
- * chip that does not.
- *
- * Rendered as a real `<ul>` inside the tile's `<article>`, so a screen reader
- * announces "list, 6 items" rather than reading a run-on line. The list is
- * labelled by the tile heading, which is the category name.
- *
- * Contrast, measured: brand-050 on the white/12 wash over solid brand-900,
- * which composites to rgb(48, 105, 141), is 5.35:1. The chips are 13px so AA
- * is the bar that applies and it is cleared with room. Raising the wash to
- * white/16 was tried and is worse, not better: it lifts the chip ground to
- * rgb(58, 111, 147) and drops the text to 4.84:1. brand-300 measures 2.51:1
- * on the same ground and is therefore never used for chip text.
+ * Chips rather than a bulleted list: at four to six items per tile a list
+ * would need its own vertical rhythm, and these are labels being scanned, not
+ * sentences being read.
  */
 function ServiceChips({
   category,
@@ -342,7 +228,7 @@ function ServiceChips({
       {category.items.map((item) => (
         <li
           key={item.slug}
-          className="inline-flex items-center rounded-pill bg-white/[0.12] px-3 py-1.5 text-micro text-brand-050"
+          className="inline-flex items-center rounded-pill bg-navy/[0.055] px-3 py-1.5 text-micro text-neutral-700"
         >
           {item.name}
         </li>
@@ -358,9 +244,12 @@ function ServiceChips({
 /**
  * The photograph half of a tile.
  *
- * Nothing sits on top of it. No scrim, no wash, no gradient — the duotone is
- * a filter on the pixels themselves, not a layer over them, and it is the only
- * thing between the source file and the screen.
+ * Nothing sits on top of it and nothing is done to it. No scrim, no wash, no
+ * gradient, and since this pass no grade either: the section's colour comes
+ * from the tiles and the icon badges, the way the hero's comes from the
+ * capsule rims. The brand duotone that used to run over these five pictures
+ * was mixed from the old blues and, once the palette moved to navy, read as a
+ * cold film rather than as a grade.
  *
  * `overflow-hidden` is here rather than only on the bezel core because of the
  * hover zoom: the core clips the tile's rounded corners, but a photograph
@@ -397,10 +286,7 @@ function CategoryPhoto({
           'motion-safe:transition-transform motion-safe:duration-[var(--duration-base)] motion-safe:ease-[var(--ease-imperial-soft)]',
           'motion-safe:group-hover:scale-[1.03]',
         )}
-        style={{
-          objectPosition: position,
-          filter: `url(#${DUOTONE_ID})`,
-        }}
+        style={{ objectPosition: position }}
       />
     </div>
   );
@@ -437,7 +323,7 @@ function CategoryTile({
   category: ServiceCategoryItem;
   index: number;
 }) {
-  const { span, layout, sizes } = TILES[category.slug];
+  const { span, layout, sizes, accent } = TILES[category.slug];
   const CategoryIcon = CATEGORY_ICONS[category.slug];
   const isFlagship = layout === 'flagship';
   const isColumn = layout === 'column';
@@ -447,7 +333,7 @@ function CategoryTile({
     <h3
       id={`${category.slug}-titel`}
       className={cn(
-        'mt-5 text-paper',
+        'mt-5 text-navy',
         isFlagship && 'text-title-md lg:text-title-lg',
         isColumn && 'text-title-md',
         isWide && 'text-title-md',
@@ -476,7 +362,7 @@ function CategoryTile({
         as="article"
         radius={isFlagship || isColumn ? 'xl' : 'lg'}
         inset={isFlagship || isColumn ? 'lg' : 'md'}
-        tone="ink"
+        tone="paper"
         elevation={isFlagship || isColumn ? 'lg' : 'sm'}
         // `group` drives the photograph's hover zoom from the whole tile, so
         // the picture reacts to the card the pointer is actually over.
@@ -493,7 +379,7 @@ function CategoryTile({
 
         <div
           className={cn(
-            'flex shadow-[inset_0_1px_0_0_rgb(255_255_255/0.10)]',
+            'flex',
             COPY_GROWTH[layout],
             isWide
               ? 'flex-col gap-6 lg:flex-row lg:items-start lg:gap-10'
@@ -506,7 +392,10 @@ function CategoryTile({
               narrower column broke it across a line as "Hausmeisterservic /
               e", which no hyphenation setting can rescue. */}
           <div className={cn(isWide && 'lg:w-[18rem] lg:shrink-0')}>
-            <IconBadge size={isFlagship || isColumn ? 'xl' : 'lg'} tone="dark">
+            <IconBadge
+              size={isFlagship || isColumn ? 'xl' : 'lg'}
+              tone={accent}
+            >
               <CategoryIcon
                 size={isFlagship || isColumn ? 30 : 24}
                 weight="light"
@@ -519,7 +408,7 @@ function CategoryTile({
           <div className={cn('flex flex-col', isWide ? 'lg:flex-1' : 'flex-1')}>
             <p
               className={cn(
-                'max-w-copy text-brand-050',
+                'max-w-copy text-neutral-700',
                 isFlagship ? 'text-body' : 'text-body-sm',
                 isWide ? 'mt-0 lg:mt-0' : 'mt-4',
               )}
@@ -575,9 +464,8 @@ export function ServicesBento() {
     <section
       id="leistungen"
       aria-labelledby="leistungen-titel"
-      className="relative bg-sand-100 py-section md:py-section-lg"
+      className="relative bg-tint-lilac py-section md:py-section-lg"
     >
-      <DuotoneFilter />
 
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <header className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-14">

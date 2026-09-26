@@ -138,7 +138,12 @@ export function StepIndicator({
                       ? 'font-medium text-ink'
                       : isReachable
                         ? 'text-neutral-700'
-                        : 'text-neutral-400',
+                        // neutral-400 measured 3.38:1 here at 13px, below AA.
+                        // A step the visitor has not reached yet is still a
+                        // label they have to read to know what is coming, so
+                        // it is muted, not faded out: neutral-500 is 5.13:1
+                        // and still three steps down from the current step.
+                        : 'text-neutral-500',
                   )}
                 >
                   {step.shortLabel}

@@ -11,46 +11,82 @@
 
 @theme static {
   /* --- Color -------------------------------------------------------------
-     Accent blue (brand-300) stays sparse: CTA hover, active states, icon
-     details. Never as a filled surface.
-     Measured contrast on --color-paper: ink 17.0:1, neutral-700 8.3:1,
-     brand-900 7.9:1, brand-700 5.6:1, neutral-500 5.0:1.
-     brand-500 is 3.9:1 and brand-300 2.3:1 — non-text only (focus ring, icon
-     details); neutral-400 is 3.2:1 — decorative and large text only, never
-     body copy. */
-  --color-brand-900: #14547e;
-  --color-brand-700: #1c6b9c;
-  --color-brand-500: #2e86c1;
-  --color-brand-300: #45b3e7;
-  --color-brand-050: #eaf4fa;
+     The site runs on the hero's palette. It used to run on two: the summit
+     tones in the hero and header, the original brand blues everywhere else,
+     which left the page carrying two darks and two blues at once. This block
+     is the merge, on the client's instruction that the whole site follow the
+     hero.
 
-  --color-neutral-700: #4a4d50;
-  --color-neutral-500: #6a6e72; /* derived: smallest AA-safe muted text */
-  --color-neutral-400: #8a8f94;
+     The six tones below are canonical. Everything under them is an alias, so
+     the twelve sections that already speak the `brand-*` / `sand-*` / `ink`
+     vocabulary keep working and there is still exactly one place a colour is
+     defined. Names like `sand` now carry the yellow family rather than a warm
+     beige; renaming them is a follow-up, not a colour decision.
+
+     Measured, and these are the numbers the sections rely on:
+
+       on paper #fbfcfd    navy 17.36  neutral-700 8.38  neutral-500 5.13
+                           brand-700 5.63  sand-700 4.93  brand-500 3.86
+                           neutral-400 3.29
+       on white            navy 17.84  neutral-700 8.61  neutral-500 5.27
+       on sand-100         navy 16.54  neutral-700 7.98  neutral-500 4.89
+                           brand-700 5.36  sand-700 4.69
+       on brand-050        navy 15.98  neutral-700 7.71  brand-700 5.18
+                           neutral-500 4.72  sand-700 4.54
+       on navy             white 17.84  brand-050 15.98  brand-300 12.03
+                           accent-sky 8.93  accent-lilac 8.78
+       on accent-sky       navy 8.93
+
+     Text floor is AA at every size in every one of those pairs. The three
+     pastels are 1.44 to 1.98 on paper and are surfaces only, never type. */
+  --color-navy: #14123a;
+  --color-accent-yellow: #f4d24a;
+  --color-accent-yellow-ink: #8a6a0e;
+  --color-accent-sky: #7dbef2;
+  --color-accent-sky-ink: #1c6b9c;
+  --color-accent-lilac: #dda0ee;
+
+  /* The two section tints. Each is its pastel laid over white at about 18 %,
+     which is the point where the hue is unmistakable and navy is still AAA on
+     it: 16.4:1 on the lilac tint, 15.98:1 on the sky tint. They are the only
+     two grounds between white and a full pastel band, so the page can change
+     colour without changing brightness. */
+  --color-tint-sky: #eaf4fa;
+  --color-tint-lilac: #f9eefc;
+
+  /* Structural aliases. Same values, the roles the components already use. */
+  --color-brand-900: var(--color-navy);
+  --color-brand-700: var(--color-accent-sky-ink);
+  /* The focus ring, and the one blue that is neither navy nor sky: it has to
+     read as a ring against both the pale tints and white. 3.86:1 on paper,
+     which is the floor for a non-text indicator. */
+  --color-brand-500: #2e86c1;
+  /* The accent on dark grounds. Was a light blue, which on navy reads as a
+     dimmer navy; the yellow is 12.03:1 there and is the hero's own accent. */
+  --color-brand-300: var(--color-accent-yellow);
+  --color-brand-050: var(--color-tint-sky);
+
+  /* Body greys, pulled toward navy so they sit in the same family as the
+     text they run under instead of reading as a second, cooler neutral. */
+  --color-neutral-700: #4b4a5e;
+  --color-neutral-500: #6b6a7d; /* smallest AA-safe muted text */
+  --color-neutral-400: #8b8a9c; /* decorative and large text only */
 
   --color-paper: #fbfcfd;
-  --color-ink: #0f1b24;
+  --color-ink: var(--color-navy);
 
-  /* The warm counterweight. Ten sections of one hue read as cold and flat, so
-     sand carries the sections whose subject is people rather than process.
-
-     Three tones, not two, and the third is not a preference. Measured against
-     every light surface on the site, sand-500 is 2.36:1 on paper, 2.17:1 on
-     brand-050 and 2.08:1 on sand-100 — below AA at every size, so it can never
-     be text on a light ground. It stays a surface, a tonal numeral and a
-     graphic detail. On ink it measures 7.22:1 and may be text.
-     sand-700 is the text-safe ochre: 5.29:1 on paper, 4.87:1 on brand-050,
-     4.67:1 on sand-100. AA everywhere, and the only warm tone an eyebrow or a
-     caption on a light section is allowed to use. */
-  --color-sand-100: #f3ede4;
-  --color-sand-500: #c9a227;
-  --color-sand-700: #856512;
+  /* sand-500 and sand-700 are the yellow accent and the one warm tone that
+     may be type on a light ground. sand-100 is no longer warm at all: the
+     cream it used to be read as beige against a page built from white, sky
+     and lilac, so the alias now points at the lilac tint. */
+  --color-sand-100: var(--color-tint-lilac);
+  --color-sand-500: var(--color-accent-yellow);
+  --color-sand-700: var(--color-accent-yellow-ink);
 
   /* The one non-brand hue on the site, and it exists only to mark a form
      error. Never decorative, never a surface on its own: an error is always
      icon + text as well, so the colour is never the sole carrier of meaning.
-     danger-700 measures 7.17:1 on --color-paper and 6.50:1 on danger-050 —
-     AA at every size, AAA for body copy on paper. */
+     danger-700 measures 7.17:1 on --color-paper and 6.50:1 on danger-050. */
   --color-danger-700: #9c2f27;
   --color-danger-050: #fbeeeb;
 
@@ -59,6 +95,11 @@
      typeface. Geist — client-confirmed 08.09.2026, self-hosted via next/font. */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  /* The hero headline, and nothing else. A high-contrast Didone is the one
+     thing in the reference that cannot be reproduced with a grotesk, and
+     keeping it to a single element is what stops the page turning into two
+     typefaces arguing. Self-hosted through next/font like the other two. */
+  --font-display: var(--font-playfair), ui-serif, Georgia, serif;
 
   /* Display sizes are fluid; body sizes are fixed so line length stays
      predictable across breakpoints. Optical tracking tightens as size grows. */
@@ -140,25 +181,25 @@
      Ambient only: wide, low-alpha, ink-tinted. No shadow-md, no hard dark
      drops. Hairlines are inset rings in ink/brand, never a 1px grey border. */
   --shadow-ambient-xs:
-    0 1px 3px -1px rgb(15 27 36 / 0.04), 0 3px 10px -4px rgb(15 27 36 / 0.05);
+    0 1px 3px -1px rgb(20 18 58 / 0.04), 0 3px 10px -4px rgb(20 18 58 / 0.05);
   --shadow-ambient-sm:
-    0 2px 6px -3px rgb(15 27 36 / 0.04), 0 8px 24px -10px rgb(15 27 36 / 0.06);
+    0 2px 6px -3px rgb(20 18 58 / 0.04), 0 8px 24px -10px rgb(20 18 58 / 0.06);
   --shadow-ambient-md:
-    0 3px 10px -5px rgb(15 27 36 / 0.04), 0 16px 44px -18px rgb(15 27 36 / 0.07),
-    0 40px 90px -50px rgb(15 27 36 / 0.08);
+    0 3px 10px -5px rgb(20 18 58 / 0.04), 0 16px 44px -18px rgb(20 18 58 / 0.07),
+    0 40px 90px -50px rgb(20 18 58 / 0.08);
   --shadow-ambient-lg:
-    0 4px 14px -8px rgb(15 27 36 / 0.04), 0 26px 70px -26px rgb(15 27 36 / 0.08),
-    0 70px 150px -70px rgb(15 27 36 / 0.1);
+    0 4px 14px -8px rgb(20 18 58 / 0.04), 0 26px 70px -26px rgb(20 18 58 / 0.08),
+    0 70px 150px -70px rgb(20 18 58 / 0.1);
   --shadow-ambient-xl:
-    0 6px 20px -12px rgb(15 27 36 / 0.04),
-    0 40px 100px -34px rgb(15 27 36 / 0.09),
-    0 110px 220px -90px rgb(15 27 36 / 0.12);
+    0 6px 20px -12px rgb(20 18 58 / 0.04),
+    0 40px 100px -34px rgb(20 18 58 / 0.09),
+    0 110px 220px -90px rgb(20 18 58 / 0.12);
   --shadow-ambient-brand:
-    0 18px 50px -20px rgb(20 84 126 / 0.28),
-    0 44px 96px -52px rgb(20 84 126 / 0.24);
+    0 18px 50px -20px rgb(20 18 58 / 0.26),
+    0 44px 96px -52px rgb(20 18 58 / 0.22);
 
-  --shadow-hairline: inset 0 0 0 1px rgb(15 27 36 / 0.06);
-  --shadow-hairline-brand: inset 0 0 0 1px rgb(20 84 126 / 0.12);
+  --shadow-hairline: inset 0 0 0 1px rgb(20 18 58 / 0.06);
+  --shadow-hairline-brand: inset 0 0 0 1px rgb(20 18 58 / 0.14);
   /* Top light edge — reads as a physical bevel on the bezel core. */
   --shadow-bevel: inset 0 1px 0 0 rgb(255 255 255 / 0.9);
 
@@ -194,9 +235,10 @@
     color-scheme: light;
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    /* Clears the floating header pill, so an anchored section does not land
-       underneath it. */
-    scroll-padding-top: 7rem;
+    /* The header is in the flow now rather than floating over the content,
+       so an anchored section only needs a little air above it instead of a
+       pill's worth of clearance. */
+    scroll-padding-top: 2rem;
   }
 
   body {
@@ -384,5 +426,135 @@
     .imp-lift:hover {
       transform: none;
     }
+  }
+}
+
+@layer components {
+  /* --- Service marquee ---------------------------------------------------
+     One track holding two identical copies of the list, translated by exactly
+     half its own width. At -50% the second copy sits precisely where the
+     first started, so the loop has no seam and no measurement: the geometry
+     is the content's, whatever the content turns out to be.
+
+     `linear` is deliberate and is the one place on this site that uses it.
+     CLAUDE.md 5.7 bans linear because it bans it for transitions, where a
+     constant rate reads as mechanical. A marquee is the opposite case: any
+     easing would make the band accelerate and decelerate once per loop, which
+     is precisely the artefact the ban exists to prevent elsewhere. */
+  @keyframes imp-marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  .imp-marquee-track {
+    animation: imp-marquee var(--marquee-duration, 32s) linear infinite;
+    will-change: transform;
+  }
+
+  /* Pointer and keyboard both stop it: the items are links, and a link that
+     moves while it is being read or tabbed to is a link that cannot be
+     used. `focus-within` also covers the stop control itself. */
+  .imp-marquee:hover .imp-marquee-track,
+  .imp-marquee:focus-within .imp-marquee-track {
+    animation-play-state: paused;
+  }
+
+  /* The explicit mechanism WCAG 2.2.2 asks for, because hover is not one:
+     moving content that starts on its own and runs past five seconds needs a
+     control a keyboard user can reach and leave set. A checkbox is that
+     control, hidden visually and represented by the label. */
+  .imp-marquee-stop:checked ~ .imp-marquee-lane .imp-marquee-track {
+    animation-play-state: paused;
+  }
+
+  .imp-marquee-stop:focus-visible ~ .imp-marquee-control {
+    outline: 2px solid var(--color-navy);
+    outline-offset: 3px;
+  }
+
+  /* The label is the button, so it carries the state the input holds. */
+  .imp-marquee-stop:checked ~ .imp-marquee-control .imp-marquee-pause,
+  .imp-marquee-control .imp-marquee-play {
+    display: none;
+  }
+
+  .imp-marquee-stop:checked ~ .imp-marquee-control .imp-marquee-play {
+    display: block;
+  }
+
+}
+
+/* Deliberately outside every cascade layer.
+ *
+ * These rules have to beat Tailwind utilities, and the utilities layer is
+ * declared after the components layer, so `display: none` written inside
+ * `@layer components` loses to the `flex` and `grid` utilities sitting on the
+ * same elements. Measured under emulated reduced motion: the duplicate lane
+ * still computed to `display: flex` and the stop control to `display: grid`,
+ * i.e. the list printed twice with a button to pause an animation that was
+ * not running. Unlayered CSS outranks every layer, which is the whole point
+ * of leaving it unlayered.
+ *
+ * What this degrades to: the global base reset already zeroes the duration,
+ * so the track does not travel. Removing the second copy and letting the
+ * first one wrap turns the band into what it always was underneath, a
+ * centred list of five links, and the stop control has nothing left to stop.
+ */
+/* Display face on the page's two heading levels, outside every cascade layer.
+ *
+ * The hero sets its headline in Playfair and the client asked the rest of the
+ * site to follow it, so every h1 and h2 takes the same face. It has to be
+ * unlayered to do that: `text-title-lg` and its siblings carry their own
+ * `font-weight` from the type scale, they live in the utilities layer, and a
+ * base-layer rule loses to them. Left in `@layer base` the headings came out
+ * at Playfair 500, which is the weight the scale sets for a grotesk and reads
+ * as thin on a Didone.
+ *
+ * h3 and h4 stay on the grotesk. A high-contrast serif at sub-heading sizes
+ * stops being a voice and starts being noise, and the small headings on this
+ * site are labels rather than statements.
+ */
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .imp-marquee-dup,
+  .imp-marquee-control {
+    display: none;
+  }
+
+  .imp-marquee-track {
+    width: auto;
+    /* `shrink-0` is what keeps the track at max-content while it is
+       travelling, and it is also what stopped it wrapping once it stood
+       still: a flex item that refuses to shrink never reaches the width at
+       which `flex-wrap` has anything to do. Measured, the static band still
+       ran off the right edge with the last category cut in half. */
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    /* The trailing gap exists so the last category clears the first one of
+       the next copy. There is no next copy here. */
+    padding-right: 0;
+  }
+
+  /* Same reason: the row ends on a separator that now separates nothing. */
+  .imp-marquee-track > li:last-child .imp-marquee-rule {
+    display: none;
+  }
+
+  .imp-marquee-lane {
+    /* The edge fade hides a word cut off by the viewport edge. Nothing is
+       cut off when nothing moves, and the fade would only dim the first and
+       last link of a centred list. */
+    mask-image: none;
+    padding-inline: 1.5rem;
   }
 }

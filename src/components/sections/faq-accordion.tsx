@@ -16,7 +16,7 @@ import { DURATION, EASE_IMPERIAL } from '@/lib/motion';
  * CLAUDE.md 5.7.
  */
 const ROW_RULE =
-  'linear-gradient(90deg, transparent, rgb(15 27 36 / 0.11) 6%, rgb(15 27 36 / 0.11) 94%, transparent)';
+  'linear-gradient(90deg, transparent, rgb(20 18 58 / 0.11) 6%, rgb(20 18 58 / 0.11) 94%, transparent)';
 
 export interface FaqAccordionProps {
   items: readonly FaqItem[];

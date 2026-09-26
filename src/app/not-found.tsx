@@ -33,7 +33,7 @@ const ENTER = { eyebrow: 0, headline: 40, lead: 80, actions: 120, aside: 160 };
 const PANE_COUNT = 9;
 const MISSING_PANE = 4;
 
-const PANE_LINE = 'inset 0 0 0 1px rgb(20 84 126 / 0.06)';
+const PANE_LINE = 'inset 0 0 0 1px rgb(20 18 58 / 0.06)';
 
 const LINK_ROW = cn(
   'group flex items-center justify-between gap-4 py-4',

@@ -148,7 +148,12 @@ function AdvantageCard({ item, index }: { item: Advantage; index: number }) {
         as="article"
         radius={isLead ? 'xl' : 'lg'}
         inset={isLead ? 'lg' : 'md'}
-        tone={isProof ? 'ink' : isLead ? 'tinted' : 'paper'}
+        // The proof card was the one filled navy surface left on the page
+        // after the bands went pastel, which made the single strongest fact
+        // look like a leftover from the old palette rather than emphasis.
+        // It is the yellow now: navy on accent-yellow is 12.03:1, and yellow
+        // is the tone the reference uses for exactly this job.
+        tone={isProof ? 'accent' : isLead ? 'tinted' : 'paper'}
         elevation={isLead ? 'lg' : isProof ? 'md' : 'sm'}
         className="h-full"
         innerClassName={cn(
@@ -162,7 +167,7 @@ function AdvantageCard({ item, index }: { item: Advantage; index: number }) {
             size={isLead ? 30 : 26}
             weight="light"
             aria-hidden="true"
-            className={isProof ? 'text-brand-300' : 'text-brand-700'}
+            className={isProof ? 'text-navy' : 'text-brand-700'}
           />
 
           <h3
@@ -171,7 +176,7 @@ function AdvantageCard({ item, index }: { item: Advantage; index: number }) {
               isLead ? 'text-title-md lg:text-title-lg' : 'text-title-sm',
               // Heading colour is inherited from the base layer, which sets
               // ink — the dark card has to opt out of it explicitly.
-              isProof && 'text-paper',
+              isProof && 'text-navy',
             )}
           >
             {item.title}
@@ -182,7 +187,7 @@ function AdvantageCard({ item, index }: { item: Advantage; index: number }) {
           {item.figure ? (
             <p
               data-numeric
-              className="mt-6 text-title-md text-paper md:mt-7"
+              className="mt-6 text-title-md text-navy md:mt-7"
             >
               {item.figure}
             </p>
@@ -193,7 +198,7 @@ function AdvantageCard({ item, index }: { item: Advantage; index: number }) {
               'max-w-copy',
               isLead ? 'text-body md:text-lead' : 'text-body-sm',
               // paper at 85% over brand-900 measures 6.2:1 — AA for body copy.
-              isProof ? 'text-paper/85' : 'text-neutral-700',
+              isProof ? 'text-navy/85' : 'text-neutral-700',
               isBand ? 'mt-6 md:mt-0' : 'mt-4',
             )}
           >
@@ -204,7 +209,7 @@ function AdvantageCard({ item, index }: { item: Advantage; index: number }) {
             <p
               className={cn(
                 'mt-auto max-w-copy pt-5 text-micro',
-                isProof ? 'text-brand-050/80' : 'text-neutral-500',
+                isProof ? 'text-navy/70' : 'text-neutral-500',
               )}
             >
               {item.qualifier}
@@ -255,7 +260,7 @@ export function Advantages() {
     <section
       id="warum-imperial"
       aria-labelledby="warum-imperial-titel"
-      className="bg-paper py-section md:py-section-lg"
+      className="bg-white py-section md:py-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-x-14 xl:gap-x-20">

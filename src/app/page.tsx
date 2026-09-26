@@ -8,6 +8,7 @@ import {
   ProcessSteps,
   QuoteFormSection,
   ServicesBento,
+  ServicesMarquee,
   TrustBar,
 } from '@/components/sections';
 import { LocalBusinessJsonLd } from '@/components/seo';
@@ -26,6 +27,10 @@ export default function Home() {
       <LocalBusinessJsonLd />
 
       <Hero />
+      {/* Between the white hero and the paper trust bar on purpose: it is the
+          deep-link row the hero's chips used to be, and it is the dark break
+          CLAUDE.md 5.9 wants before two light sections run into a third. */}
+      <ServicesMarquee />
       <TrustBar />
       <ServicesBento />
       <ProcessSteps />

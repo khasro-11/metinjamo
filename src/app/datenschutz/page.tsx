@@ -24,10 +24,19 @@
        (§ 38 BDSG). Mitarbeiterzahl liegt noch nicht vor — deshalb hier
        bewusst KEINE Aussage.
 
-   Bewusst NICHT enthalten, weil die Dienste nicht laufen: Cookies,
-   Analytics, Google Fonts, Google Maps, Social Plugins, WhatsApp. Kommt
-   einer davon dazu, braucht er hier einen eigenen Abschnitt — und ggf. ein
-   Consent-Banner (CLAUDE.md 3).
+   Bewusst NICHT enthalten, weil die Dienste nicht laufen: Analytics,
+   Google Fonts, Google Maps, Social Plugins, WhatsApp. Kommt einer davon
+   dazu, braucht er hier einen eigenen Abschnitt mit Zweck, Anbieter,
+   Rechtsgrundlage und Speicherdauer.
+
+   Zum Einwilligungsbanner (Abschnitt 09): es läuft seit der Einrichtung des
+   Consent-Managers (lib/consent.ts). Technisch NOTWENDIG ist es derzeit
+   nicht — die Seite setzt keine einwilligungspflichtigen Cookies und bindet
+   keinen Drittdienst ein —, es ist eine Entscheidung des Kunden. Abschnitt 09
+   sagt deshalb ausdrücklich, dass aktuell kein externer Dienst eingebunden
+   ist. Diese Aussage ist eine Tatsachenbehauptung über den Code und muss
+   fallen, sobald der erste Dienst hinter `hasConsent('extern')` scharf
+   geschaltet wird.
 
    ========================================================================== */
 
@@ -50,6 +59,7 @@ import {
   createSectionIndex,
 } from '@/components/legal';
 import { company } from '@/config/company';
+import { CONSENT_STORAGE_KEY } from '@/lib/consent';
 
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung',
@@ -487,8 +497,33 @@ export default function DatenschutzPage() {
               Diese Website setzt <strong>keine Cookies</strong>, die nicht
               technisch notwendig sind, und verwendet weder Analyse- noch
               Tracking-Werkzeuge. Es gibt kein Nutzerprofil, kein
-              Werbe-Pixel und keine Reichweitenmessung. Aus demselben Grund
-              benötigt diese Seite kein Einwilligungsbanner.
+              Werbe-Pixel und keine Reichweitenmessung.
+            </p>
+            <p>
+              Beim ersten Besuch fragen wir Sie über einen Hinweis am unteren
+              Bildschirmrand, ob externe Inhalte geladen werden dürfen. Das
+              betrifft Dienste, die von fremden Servern ausgeliefert werden —
+              etwa eine Karte zur Anfahrt oder ein Messenger-Kontakt —, bei
+              denen Ihre IP-Adresse an den jeweiligen Anbieter übertragen
+              würde. <strong>Derzeit ist kein solcher Dienst eingebunden</strong>;
+              Ihre Entscheidung greift, sobald einer hinzukommt. Bis dahin wird
+              unabhängig von Ihrer Auswahl nichts an Dritte übertragen.
+            </p>
+            <p>
+              Ihre Auswahl speichern wir ausschließlich lokal in Ihrem Browser
+              (<span data-numeric="">localStorage</span>, Schlüssel{' '}
+              <span data-numeric="">{CONSENT_STORAGE_KEY}</span>). Diese
+              Speicherung ist nach § 25 Abs. 2 TDDDG unbedingt erforderlich, um
+              Ihren Widerspruch überhaupt merken zu können, und wird deshalb
+              nicht von Ihrer Einwilligung abhängig gemacht. Die Angabe
+              verlässt Ihr Gerät nicht und erreicht unseren Server nicht.
+            </p>
+            <p>
+              Sie können Ihre Entscheidung jederzeit ändern oder zurücknehmen —
+              über <strong>Cookie-Einstellungen</strong> im Fußbereich jeder
+              Seite. Rechtsgrundlage für das Laden externer Inhalte wäre Ihre
+              Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO in Verbindung mit
+              § 25 Abs. 1 TDDDG.
             </p>
             <p>
               Die verwendeten Schriften werden von unserem eigenen Server

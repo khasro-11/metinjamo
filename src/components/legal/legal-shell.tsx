@@ -271,8 +271,22 @@ export function Pending({ children }: { children: ReactNode }) {
    Links
    ---------------------------------------------------------------------- */
 
+/**
+ * Every link in the legal running text.
+ *
+ * `py-3.5` is the tap target: measured on a 390px phone these sat at 22px
+ * tall, and while WCAG 2.5.8 exempts a link inside a sentence, two of them
+ * are the phone number and the mailbox, which are the only two ways to reach
+ * anyone from a legal page. Vertical padding on an inline element grows the
+ * hit area without moving the line.
+ *
+ * The underline is navy at 40 % rather than brand-300. brand-300 is the
+ * yellow now, and a yellow underline on white measures 1.44:1 — the one
+ * marker that tells a reader this run of text is a link would have been
+ * invisible.
+ */
 const LINK_CLASS = cn(
-  'text-brand-900 underline decoration-brand-300 underline-offset-4',
+  'py-3.5 text-brand-900 underline decoration-navy/40 underline-offset-4',
   'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
   'hover:decoration-brand-700',
   'focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-brand-500',

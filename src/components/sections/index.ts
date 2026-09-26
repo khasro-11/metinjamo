@@ -7,4 +7,5 @@ export { Hero } from './hero';
 export { ProcessSteps } from './process-steps';
 export { QuoteFormSection } from './quote-form';
 export { ServicesBento } from './services-bento';
+export { ServicesMarquee } from './services-marquee';
 export { TrustBar } from './trust-bar';

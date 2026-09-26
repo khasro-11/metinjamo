@@ -3,12 +3,16 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 export type IconBadgeSize = 'sm' | 'md' | 'lg' | 'xl';
-export type IconBadgeTone = 'light' | 'dark';
+export type IconBadgeTone = 'light' | 'dark' | 'sky' | 'lilac';
 
 export interface IconBadgeProps {
   children: ReactNode;
   size?: IconBadgeSize;
-  /** `dark` for the brand-900 anchor sections and the filled bento tiles. */
+  /**
+   * `dark` for the navy anchor sections and the filled bento tiles.
+   * `sky` and `lilac` are the hero's other two capsule tones, so a run of
+   * badges can carry the same three-colour system the collage does.
+   */
   tone?: IconBadgeTone;
   className?: string;
 }
@@ -33,9 +37,16 @@ const SIZE: Record<IconBadgeSize, string> = {
  * as the failing one. This is the same treatment the terminal node in Ablauf
  * carries, so the two dark contexts share one language.
  */
+/**
+ * All three filled tones carry navy glyphs, and all three clear AAA doing it:
+ * navy on accent-yellow 12.03:1, on accent-sky 8.93:1, on accent-lilac
+ * 8.78:1. White would be 2.0:1 on the sky and is never an option on a pastel.
+ */
 const TONE: Record<IconBadgeTone, string> = {
   light: 'bg-brand-050 text-brand-700 shadow-[var(--shadow-hairline-brand)]',
-  dark: 'bg-brand-300 text-brand-900 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35)]',
+  dark: 'bg-accent-yellow text-navy shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35)]',
+  sky: 'bg-accent-sky text-navy shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35)]',
+  lilac: 'bg-accent-lilac text-navy shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35)]',
 };
 
 /**

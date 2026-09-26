@@ -437,7 +437,7 @@ export function ConsentLink({
       rel="noopener noreferrer"
       onClick={keepFormState}
       className={cn(
-        'rounded-[0.25rem] font-medium text-brand-900 underline decoration-brand-300',
+        'rounded-[0.25rem] font-medium text-brand-900 underline decoration-navy/40',
         'underline-offset-4 transition-colors duration-[var(--duration-swift)]',
         'ease-imperial-soft hover:decoration-brand-900',
       )}

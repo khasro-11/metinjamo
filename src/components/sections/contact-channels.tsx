@@ -257,7 +257,7 @@ function AvailabilityPanel() {
         <div
           className="mt-8 flex gap-4 pt-8"
           style={{
-            boxShadow: 'inset 0 1px 0 0 rgb(20 84 126 / 0.12)',
+            boxShadow: 'inset 0 1px 0 0 rgb(20 18 58 / 0.12)',
           }}
         >
           <IconBadge size="md">
@@ -324,7 +324,7 @@ export function ContactChannels() {
     <section
       id="kontaktwege"
       aria-labelledby="kontaktwege-titel"
-      className="bg-paper py-section md:py-section-lg"
+      className="bg-tint-lilac py-section md:py-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <header className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-14">

@@ -1,5 +1,6 @@
 import { Eyebrow, Reveal } from '@/components/ui';
 import { company } from '@/config/company';
+import { cn } from '@/lib/cn';
 import { faqItems } from '@/content/faq';
 
 import { FaqAccordion } from './faq-accordion';
@@ -64,7 +65,7 @@ export function Faq() {
     <section
       id="faq"
       aria-labelledby="faq-titel"
-      className="bg-brand-050 py-section md:py-section-lg"
+      className="bg-white py-section md:py-section-lg"
     >
       <FaqJsonLd />
 
@@ -98,7 +99,16 @@ export function Faq() {
                 <a
                   href={company.phone.href}
                   data-numeric
-                  className="text-brand-900 underline decoration-brand-300 decoration-1 underline-offset-4 transition-colors duration-[var(--duration-swift)] ease-imperial-soft hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-brand-500"
+                  className={cn(
+                    // `py-3` is the tap target, not the look: inline padding
+                    // does not move the line but takes the target from 19px
+                    // to 43px on a phone.
+                    'py-3.5 text-brand-900 underline decoration-navy/40 decoration-1',
+                    'underline-offset-4 transition-colors',
+                    'duration-[var(--duration-swift)] ease-imperial-soft',
+                    'hover:text-brand-700 focus-visible:outline-2',
+                    'focus-visible:outline-offset-3 focus-visible:outline-brand-500',
+                  )}
                 >
                   {company.phone.display}
                 </a>{' '}

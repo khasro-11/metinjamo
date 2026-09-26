@@ -72,9 +72,9 @@ const RAIL_START = '3.25rem';
  * inverse of the value it had while this section was on paper.
  */
 const RAIL_HORIZONTAL =
-  'linear-gradient(90deg, rgb(69 179 231 / 0.55), rgb(69 179 231 / 0.14))';
+  'linear-gradient(90deg, rgb(20 18 58 / 0.35), rgb(20 18 58 / 0.10))';
 const RAIL_VERTICAL =
-  'linear-gradient(180deg, rgb(69 179 231 / 0.55), rgb(69 179 231 / 0.14))';
+  'linear-gradient(180deg, rgb(244 210 74 / 0.55), rgb(244 210 74 / 0.16))';
 
 const NODE_BASE =
   'grid size-11 shrink-0 place-items-center rounded-[1.125rem]';
@@ -101,7 +101,12 @@ function StepNode({ icon: StepIcon, terminal }: { icon: Icon; terminal: boolean 
       className={cn(
         NODE_BASE,
         'absolute left-0 top-0 lg:static',
-        terminal ? 'bg-brand-300 text-brand-900' : 'bg-white/10 text-brand-050',
+        // On a yellow ground the terminal marker can no longer be yellow.
+        // Navy filled reads as the end of the rail; the other three are white
+        // plates with a navy glyph.
+        terminal
+          ? 'bg-navy text-paper'
+          : 'bg-white text-navy shadow-[var(--shadow-hairline)]',
       )}
     >
       <StepIcon size={20} weight="light" />
@@ -155,7 +160,7 @@ function StepItem({ step, index }: { step: ProcessStep; index: number }) {
         as="article"
         radius="lg"
         inset="md"
-        tone={isLast ? 'inkRaised' : 'inkPlate'}
+        tone={isLast ? 'tinted' : 'paper'}
         elevation={isLast ? 'md' : 'flat'}
         className="lg:mt-8 lg:flex-1"
         innerClassName={cn(
@@ -179,17 +184,17 @@ function StepItem({ step, index }: { step: ProcessStep; index: number }) {
             // raised terminal card, where an opaque tone would vanish. Drawn
             // in the accent so the ordinals read as part of the rail rather
             // than as grey noise.
-            'text-[5.5rem] tracking-[-0.05em] text-brand-300/[0.16] md:right-6 md:text-[6.5rem] lg:right-4 lg:text-[7rem]',
+            'text-[5.5rem] tracking-[-0.05em] text-navy/[0.13] md:right-6 md:text-[6.5rem] lg:right-4 lg:text-[7rem]',
           )}
         >
           {String(index + 1).padStart(2, '0')}
         </span>
 
-        <h3 className="relative text-title-sm text-paper md:w-[15rem] md:shrink-0 md:text-title-md lg:w-auto">
+        <h3 className="relative text-title-sm text-navy md:w-[15rem] md:shrink-0 md:text-title-md lg:w-auto">
           {step.title}
         </h3>
 
-        <p className="relative mt-3 max-w-copy text-body-sm text-brand-050 md:mt-0 md:flex-1 lg:mt-4 lg:flex-none">
+        <p className="relative mt-3 max-w-copy text-body-sm text-neutral-700 md:mt-0 md:flex-1 lg:mt-4 lg:flex-none">
           {step.body}
         </p>
       </Bezel>
@@ -227,13 +232,16 @@ export function ProcessSteps() {
     <section
       id="ablauf"
       aria-labelledby="ablauf-titel"
-      className="bg-brand-900 py-section md:py-section-lg"
+      className="bg-accent-yellow py-section md:py-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <header className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-14">
           <div className="lg:col-span-7">
             <Reveal distance={16}>
-              <Eyebrow tone="dark">Ablauf</Eyebrow>
+              {/* The sand pill measured 4.48:1 on this ground, a hair under AA
+                  at 10px. The light pill is a solid brand-050 plate, so it is
+                  5.18:1 whatever the section behind it is doing. */}
+              <Eyebrow>Ablauf</Eyebrow>
             </Reveal>
 
             <Reveal delay={0.08}>
@@ -244,16 +252,19 @@ export function ProcessSteps() {
                   why the rest of the line stays paper. */}
               <h2
                 id="ablauf-titel"
-                className="mt-6 text-title-lg text-paper"
+                className="mt-6 text-title-lg text-navy"
               >
                 Von der Anfrage bis zur{' '}
-                <span className="text-brand-300">laufenden Betreuung</span>.
+                {/* accent-sky-ink on accent-yellow is 3.90:1 — AA for large text,
+                    which this headline is at 30 to 46px. It is the only tone
+                    in the palette that is both legible here and not navy. */}
+                <span className="text-accent-sky-ink">laufenden Betreuung</span>.
               </h2>
             </Reveal>
           </div>
 
           <Reveal delay={0.14} className="lg:col-span-5">
-            <p className="max-w-copy text-body text-brand-050">
+            <p className="max-w-copy text-body text-neutral-700">
               Wir nennen keinen Preis, bevor wir das Objekt gesehen haben.
               Danach wissen Sie, wer kommt, was gemacht wird und was es kostet.
             </p>

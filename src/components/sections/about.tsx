@@ -2,6 +2,7 @@ import Image from 'next/image';
 
 import { Bezel, Button, Eyebrow, Reveal } from '@/components/ui';
 import { company } from '@/config/company';
+import { cn } from '@/lib/cn';
 import { primaryCta } from '@/config/navigation';
 
 /**
@@ -30,88 +31,73 @@ const HEADLINE: readonly { text: string; key?: true }[] = [
 /**
  * The portrait of the managing director.
  *
- * The intrinsic size is the constraint that shapes the whole frame below.
- * 276 x 295 is a thumbnail: filling the 438px-wide bezel core with it would
- * upscale it 1.6x on a normal display and 3.2x on a retina one, which on a
- * trust-first brief looks like a photo lifted off someone's phone — the exact
- * impression the section exists to avoid.
+ * This frame used to be built around a constraint that no longer exists. The
+ * old file was 276 x 295, a thumbnail, so the photo was matted: shown at 62 %
+ * of the bezel core on a paper field with a painted-in daylight gradient,
+ * because a wide mat around a small print reads as framing while the same
+ * print stretched edge to edge reads as a low-resolution asset.
  *
- * So the photo is matted instead of stretched. At 62% of the core it renders
- * at roughly its native pixel width, which is sharp at 1x and merely soft at
- * 2x, and a wide mat around a small print reads as a deliberate framing rather
- * than as a low-resolution asset.
+ * The client has supplied the real file. At 1304 x 1330 it renders at roughly
+ * three times the ~430px the frame gives it, so the mat, the gradient and the
+ * inner hairline are all gone and the photograph fills the frame — which is
+ * the composition this section was drawn for in the first place.
  *
- * TODO (client): supply the original file, ideally >= 1400px on the long edge.
- * With that in hand the photo can fill the frame edge to edge and the mat can
- * go — that is the composition this section was drawn for.
+ * The caption moved out of the frame and under it. With the photo filling the
+ * core there is nowhere inside for type to sit, and nothing may be laid over a
+ * photograph on this site (CLAUDE.md 5.9). A plate under the print is also
+ * how a framed photograph is actually hung.
  */
 const PORTRAIT = {
-  src: '/metinjamu.jpg',
-  width: 276,
-  height: 295,
+  src: '/metinjamu.png',
+  width: 1304,
+  height: 1330,
   alt: `${company.managingDirector.name}, Geschäftsführer der ${company.legalName}`,
+  /**
+   * The source is all but square (0.98) and the frame is 4:5, so the crop
+   * takes about 240px off the width and nothing off the height. The subject
+   * sits slightly right of centre — his head is centred on 55.6 % of the
+   * frame — so the crop is biased there rather than left at 50 %, which would
+   * shave his shoulder.
+   */
+  position: '55% center',
 } as const;
 
 /**
- * Rendered width of the print, as a fraction of the bezel core. Kept in one
- * place because the `sizes` attribute below has to agree with it — if they
- * drift, the browser picks a candidate for the wrong box.
+ * Rendered width of the frame's core: the capped frame width above, less the
+ * bezel inset on both sides (2 x 0.5rem). It has to agree with those caps —
+ * if the two drift, the browser picks a candidate for a box that does not
+ * exist.
  */
-const PRINT_WIDTH = '62%';
+const PORTRAIT_SIZES =
+  '(min-width: 1280px) 304px, (min-width: 1024px) 272px, (min-width: 640px) 304px, 272px';
 
 /**
- * At lg the core is ~438px wide (a 5-column span of the 78rem shell), so the
- * print lands at ~272px. Below that the field is capped at 25rem and then
- * tracks the viewport.
- */
-const PRINT_SIZES = '(min-width: 1024px) 275px, (min-width: 640px) 240px, 55vw';
-
-/**
- * The framed portrait: a double-bezel frame, a paper mat, the print, and the
- * caption under it — the order a photograph is actually hung in.
- *
- * The abstract window raster that stood here before is gone. It was the
- * placeholder for this photo, and keeping brand motif and portrait in one
- * frame would put two subjects in a picture that has room for one.
+ * The framed portrait: a double-bezel frame, the print, and the plate under
+ * it.
  *
  * Server component, no JavaScript.
  */
 function AboutPortrait({ className }: { className?: string }) {
   return (
-    <Bezel
-      as="figure"
-      radius="xl"
-      inset="lg"
-      tone="paper"
-      elevation="xl"
-      className={className}
-      innerClassName="relative flex aspect-[4/5] flex-col items-center justify-center gap-7 overflow-hidden px-[10%]"
-    >
-      {/* Daylight falling in from the top left, the way it does through a
-          stairwell window. Static gradient — nothing here animates. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[radial-gradient(120%_90%_at_18%_8%,var(--color-brand-050)_0%,rgb(234_244_250/0.35)_46%,transparent_78%)]"
-      />
-
-      {/* The print sits on the mat with its own hairline and a soft ambient
-          shadow, so it reads as a physical object laid on the surface rather
-          than as a cropped div. Its own aspect is kept — no crop, no squeeze. */}
-      <div
-        style={{ width: PRINT_WIDTH }}
-        className="relative overflow-hidden rounded-bezel-sm shadow-[var(--shadow-ambient-md),var(--shadow-hairline)]"
+    <figure className={className}>
+      <Bezel
+        radius="xl"
+        inset="lg"
+        tone="paper"
+        elevation="xl"
+        innerClassName="relative aspect-[4/5] overflow-hidden"
       >
         <Image
           src={PORTRAIT.src}
-          width={PORTRAIT.width}
-          height={PORTRAIT.height}
           alt={PORTRAIT.alt}
-          sizes={PRINT_SIZES}
-          className="h-auto w-full"
+          fill
+          sizes={PORTRAIT_SIZES}
+          style={{ objectPosition: PORTRAIT.position }}
+          className="object-cover"
         />
-      </div>
+      </Bezel>
 
-      <figcaption className="relative text-center">
+      <figcaption className="mt-5 text-center">
         <span className="block text-title-sm text-ink">
           {company.managingDirector.name}
         </span>
@@ -119,7 +105,7 @@ function AboutPortrait({ className }: { className?: string }) {
           Geschäftsführer, {company.legalName}
         </span>
       </figcaption>
-    </Bezel>
+    </figure>
   );
 }
 
@@ -179,7 +165,7 @@ export function About() {
          rather than process, and sand is what separates it from the four
          blue-family grounds around it. ink 15.01:1, neutral-700 7.31:1,
          brand-700 4.97:1. */
-      className="bg-sand-100 py-section md:py-section-lg"
+      className="bg-tint-sky py-section md:py-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-x-14 xl:gap-x-20">
@@ -238,7 +224,16 @@ export function About() {
             delay={0.1}
             distance={20}
             amount={0.15}
-            className="mx-auto w-full max-w-[22rem] sm:max-w-[25rem] lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:row-span-2 lg:mx-0 lg:mt-16 lg:max-w-none"
+            className={cn(
+              // The frame is capped rather than left to fill its column. At
+              // the shell's widest the five-column span is about 424px, and a
+              // portrait at that size started competing with the headline
+              // beside it instead of supporting it. Capped, it reads as a
+              // print hung next to the text.
+              'mx-auto w-full max-w-[18rem] sm:max-w-[20rem]',
+              'lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:row-span-2',
+              'lg:mx-0 lg:mt-16 lg:max-w-[18rem] xl:max-w-[20rem]',
+            )}
           >
             <AboutPortrait />
           </Reveal>

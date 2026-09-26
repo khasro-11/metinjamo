@@ -36,6 +36,15 @@ const nextConfig: NextConfig = {
   // Pin the workspace root so Turbopack ignores stray lockfiles above the repo.
   turbopack: { root: path.resolve(__dirname) },
 
+  /**
+   * Next 16 writes an AGENTS.md on every `next dev` and, on a case-insensitive
+   * filesystem, replaces this repository's CLAUDE.md with a one-line pointer
+   * at it. That file is the client brief — 419 lines of binding instructions —
+   * and losing it to a dev-server side effect is not a trade worth making for
+   * a framework changelog. Turned off; the brief stays authoritative.
+   */
+  agentRules: false,
+
   async redirects() {
     return [
       ...Object.entries(RETIRED_SERVICE_ROUTES).map(([slug, anchor]) => ({

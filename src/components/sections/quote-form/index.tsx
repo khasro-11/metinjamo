@@ -56,7 +56,7 @@ export function QuoteFormSection() {
     <section
       id="angebot"
       aria-labelledby="angebot-titel"
-      className="bg-brand-050 py-section md:py-section-lg"
+      className="bg-white py-section md:py-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <div className="grid gap-6 lg:grid-cols-12 lg:gap-x-14">

@@ -69,14 +69,14 @@ export function FinalCta() {
          coloured band cannot borrow the next element's margin: the fill would
          stop at the text instead of at the section boundary. The footer drops
          its top margin in return, so the total whitespace is unchanged. */
-      className="bg-brand-900 pt-section pb-section md:pt-section-lg md:pb-section-lg"
+      className="bg-accent-sky pt-section pb-section md:pt-section-lg md:pb-section-lg"
     >
       <div className="mx-auto w-full max-w-shell px-6 md:px-10">
         <Reveal distance={20} amount={0.15}>
           <Bezel
             radius="xl"
             inset="lg"
-            tone="inkPlate"
+            tone="paper"
             elevation="flat"
             /* p-10 at 360px left 216px of inner width, which is less than the
                246px the primary pill needs, so both the button label and the
@@ -85,19 +85,19 @@ export function FinalCta() {
           >
             <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-x-20">
               <div className="lg:col-span-7">
-                <Eyebrow tone="dark">Nächster Schritt</Eyebrow>
+                <Eyebrow>Nächster Schritt</Eyebrow>
 
                 {/* text-title-xl is 38px at its smallest, so brand-300's
                     3.41:1 on brand-900 clears the 3:1 large-text threshold. */}
                 <h2
                   id="abschluss-titel"
-                  className="mt-6 max-w-[20ch] text-title-xl text-paper"
+                  className="mt-6 max-w-[20ch] text-title-xl text-navy"
                 >
                   Der nächste Schritt ist ein{' '}
-                  <span className="text-brand-300">Blick auf Ihr Objekt</span>.
+                  <span className="text-accent-sky-ink">Blick auf Ihr Objekt</span>.
                 </h2>
 
-                <p className="mt-6 max-w-copy text-lead text-brand-050">
+                <p className="mt-6 max-w-copy text-lead text-neutral-700">
                   Wir nennen keinen Preis, bevor wir gesehen haben, worum es
                   geht. Sagen Sie uns, was ansteht — den Rest klären wir vor
                   Ort, und Sie bekommen ein Angebot, das Sie in Ruhe prüfen
@@ -116,11 +116,11 @@ export function FinalCta() {
                 {/* Secondary, not primary: the primary surface is
                     brand-900 itself and would disappear into this ground.
                     White on brand-900 with ink text is 17.46:1. */}
-                <Button href={primaryCta.href} size="lg" variant="secondary">
+                <Button href={primaryCta.href} size="lg" variant="primary">
                   {primaryCta.label}
                 </Button>
 
-                <p className="mt-8 text-body-sm text-brand-050/80">
+                <p className="mt-8 text-body-sm text-neutral-700">
                   Oder direkt anrufen:
                 </p>
 
@@ -138,7 +138,7 @@ export function FinalCta() {
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'grid size-10 shrink-0 place-items-center rounded-full bg-white',
+                      'grid size-10 shrink-0 place-items-center rounded-full bg-accent-sky text-navy',
                       'text-brand-700 shadow-[var(--shadow-hairline-brand)]',
                       'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
                       'group-hover:bg-brand-300 group-hover:text-brand-900',
@@ -149,14 +149,14 @@ export function FinalCta() {
 
                   <span
                     data-numeric
-                    className="text-title-md text-paper underline-offset-[6px] transition-colors duration-[var(--duration-swift)] ease-imperial-soft group-hover:text-brand-300 group-hover:underline"
+                    className="text-title-md text-navy underline-offset-[6px] transition-colors duration-[var(--duration-swift)] ease-imperial-soft group-hover:text-accent-sky-ink group-hover:underline"
                   >
                     {company.phone.display}
                   </span>
                 </a>
 
                 {businessHours ? (
-                  <p className="mt-4 text-micro text-brand-050/80">
+                  <p className="mt-4 text-micro text-neutral-700">
                     {businessHours.daysLabel} {businessHours.timeLabel}. Akutfälle
                     auch außerhalb dieser Zeiten.
                   </p>

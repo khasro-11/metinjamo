@@ -57,7 +57,7 @@ function PhoneFallback({ className }: { className?: string }) {
         href={company.phone.href}
         className={cn(
           'rounded-[0.25rem] font-medium whitespace-nowrap text-brand-900',
-          'underline decoration-brand-300 underline-offset-4',
+          'underline decoration-navy/40 underline-offset-4',
           'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
           'hover:decoration-brand-900',
         )}

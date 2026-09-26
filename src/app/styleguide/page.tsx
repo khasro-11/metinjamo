@@ -78,15 +78,15 @@ function Swatch({
 const COLORS = [
   {
     name: '--color-brand-900',
-    value: '#14547e',
+    value: '#14123a',
     className: 'bg-brand-900',
-    contrast: '7.9:1 auf Paper — AAA',
+    contrast: '17.4:1 auf Paper — AAA. Alias von --color-navy',
   },
   {
     name: '--color-brand-700',
     value: '#1c6b9c',
     className: 'bg-brand-700',
-    contrast: '5.6:1 auf Paper — AA',
+    contrast: '5.6:1 auf Paper — AA. Alias von --color-accent-sky-ink',
   },
   {
     name: '--color-brand-500',
@@ -96,9 +96,9 @@ const COLORS = [
   },
   {
     name: '--color-brand-300',
-    value: '#45b3e7',
+    value: '#f4d24a',
     className: 'bg-brand-300',
-    contrast: '2.3:1 — Akzent, nie auf Text angewendet',
+    contrast: '12.0:1 auf Navy — Akzent auf dunklem Grund. Alias von --color-accent-yellow',
   },
   {
     name: '--color-brand-050',
@@ -108,27 +108,27 @@ const COLORS = [
   },
   {
     name: '--color-neutral-700',
-    value: '#4a4d50',
+    value: '#4b4a5e',
     className: 'bg-neutral-700',
-    contrast: '8.3:1 auf Paper — Fließtext',
+    contrast: '8.4:1 auf Paper — Fließtext',
   },
   {
     name: '--color-neutral-500',
-    value: '#6a6e72',
+    value: '#6b6a7d',
     className: 'bg-neutral-500',
-    contrast: '5.0:1 auf Paper — kleinster AA-sicherer Grauton',
+    contrast: '5.1:1 auf Paper — kleinster AA-sicherer Grauton',
   },
   {
     name: '--color-neutral-400',
-    value: '#8a8f94',
+    value: '#8b8a9c',
     className: 'bg-neutral-400',
-    contrast: '3.2:1 — nicht für Fließtext',
+    contrast: '3.3:1 — nicht für Fließtext',
   },
   {
     name: '--color-ink',
-    value: '#0f1b24',
+    value: '#14123a',
     className: 'bg-ink',
-    contrast: '17.0:1 auf Paper — Headlines',
+    contrast: '17.4:1 auf Paper — Headlines. Alias von --color-navy',
   },
   {
     name: '--color-paper',

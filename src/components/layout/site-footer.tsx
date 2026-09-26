@@ -4,6 +4,7 @@ import { PhoneIcon } from '@phosphor-icons/react/dist/ssr/Phone';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { ConsentSettingsLink } from '@/components/consent';
 import { WindowMark } from '@/components/ui';
 import { company } from '@/config/company';
 import { legalNav, primaryNav, serviceNav } from '@/config/navigation';
@@ -17,9 +18,9 @@ import { LOGO_LINK_LABEL, Logo } from './logo';
  * sitemap dump, not as a footer.
  */
 const LINK_CLASS = cn(
-  'inline-flex min-h-11 items-center text-body-sm text-brand-050 underline-offset-4',
+  'inline-flex min-h-11 items-center text-body-sm text-neutral-700 underline-offset-4',
   'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
-  'hover:text-brand-300 hover:underline',
+  'hover:text-navy hover:underline',
   'focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-brand-500',
 );
 
@@ -31,8 +32,8 @@ const LINK_CLASS = cn(
  */
 function ColumnHeading({ children }: { children: ReactNode }) {
   return (
-    <h2 className="flex items-center gap-2 text-eyebrow uppercase text-brand-300">
-      <WindowMark className="text-brand-300" />
+    <h2 className="flex items-center gap-2 text-eyebrow uppercase text-brand-700">
+      <WindowMark className="text-accent-sky-ink" />
       <span className="-mr-[0.2em]">{children}</span>
     </h2>
   );
@@ -50,7 +51,7 @@ function ContactRow({
     <div className="flex gap-3">
       <span
         aria-hidden="true"
-        className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-white/[0.08] text-brand-300 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.10)]"
+        className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-white text-brand-700 shadow-[var(--shadow-hairline)]"
       >
         {icon}
       </span>
@@ -94,7 +95,7 @@ export function SiteFooter() {
 
   return (
     <footer
-      className="bg-ink"
+      className="bg-brand-050"
       style={{ boxShadow: 'inset 0 1px 0 0 rgb(255 255 255 / 0.10)' }}
     >
       <div className="mx-auto max-w-shell px-6 py-section md:px-10 md:py-section-md">
@@ -110,21 +111,21 @@ export function SiteFooter() {
               {/* Larger than in the header: the pill rations vertical space,
                   the footer's brand column does not, and this is the block
                   that has to read as the signature of the page. */}
-              <Logo variant="wordmark" tone="white" height={46} />
+              <Logo variant="wordmark" height={46} />
             </Link>
 
-            <p className="max-w-copy text-body text-brand-050">
+            <p className="max-w-copy text-body text-neutral-700">
               Gebäudeservice für Hausverwaltungen, Gewerbeobjekte und
               Eigentümer.
             </p>
 
-            <p className="max-w-copy text-body-sm text-neutral-400">
+            <p className="max-w-copy text-body-sm text-neutral-500">
               {company.serviceArea.sentence}
             </p>
 
             {/* A verified fact from company.ts, not a marketing promise —
                 the one trust signal in the footer that is actually provable. */}
-            <p className="max-w-copy text-micro text-neutral-400">
+            <p className="max-w-copy text-micro text-neutral-500">
               {company.liabilityInsurance.type} mit{' '}
               {company.liabilityInsurance.coverage}.
             </p>
@@ -166,7 +167,7 @@ export function SiteFooter() {
               <ContactRow
                 icon={<MapPinIcon size={15} weight="light" />}
               >
-                <address className="text-body-sm not-italic text-brand-050">
+                <address className="text-body-sm not-italic text-neutral-700">
                   {company.address.street}
                   <br />
                   {company.address.postalCode} {company.address.city}
@@ -195,21 +196,21 @@ export function SiteFooter() {
             <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-5 gap-y-1.5 text-body-sm">
               {scheduled.map((entry) => (
                 <div key={entry.daysLabel} className="col-span-2 grid grid-cols-subgrid">
-                  <dt className="text-neutral-400">{entry.daysLabel}</dt>
-                  <dd className="text-brand-050">{entry.timeLabel}</dd>
+                  <dt className="text-neutral-500">{entry.daysLabel}</dt>
+                  <dd className="text-neutral-700">{entry.timeLabel}</dd>
                 </div>
               ))}
             </dl>
 
             {emergency ? (
-              <p className="max-w-copy text-micro text-neutral-400">
-                <span className="text-brand-300">{emergency.daysLabel}:</span>{' '}
+              <p className="max-w-copy text-micro text-neutral-500">
+                <span className="text-brand-700">{emergency.daysLabel}:</span>{' '}
                 {emergency.timeLabel}
               </p>
             ) : null}
 
-            <p className="max-w-copy text-micro text-neutral-400">
-              <span className="text-brand-300">Einsatzgebiet:</span>{' '}
+            <p className="max-w-copy text-micro text-neutral-500">
+              <span className="text-brand-700">Einsatzgebiet:</span>{' '}
               {company.serviceArea.primary}. {company.serviceArea.note}
             </p>
           </div>
@@ -219,7 +220,7 @@ export function SiteFooter() {
           className="mt-16 flex flex-col gap-4 pt-8 sm:flex-row sm:items-center sm:justify-between"
           style={{ boxShadow: 'inset 0 1px 0 0 rgb(255 255 255 / 0.10)' }}
         >
-          <p className="text-micro text-neutral-400">
+          <p className="text-micro text-neutral-500">
             © {year} {company.legalName}
           </p>
 
@@ -231,7 +232,7 @@ export function SiteFooter() {
                     href={item.href}
                     className={cn(
                       'inline-flex min-h-11 items-center',
-                      'text-micro text-neutral-400 underline-offset-4',
+                      'text-micro text-neutral-500 underline-offset-4',
                       'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
                       'hover:text-brand-300 hover:underline',
                       'focus-visible:outline-2 focus-visible:outline-offset-3',
@@ -242,6 +243,14 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
+
+              {/* Art. 7 Abs. 3 DSGVO: withdrawing has to be as easy as
+                  giving, so the way back into the settings is permanent and
+                  sits with the other legal links rather than only inside a
+                  banner the visitor has already dismissed. */}
+              <li>
+                <ConsentSettingsLink />
+              </li>
             </ul>
           </nav>
         </div>

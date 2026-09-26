@@ -278,8 +278,9 @@ export function MobileMenu({ className }: { className?: string }) {
                overlay scrolls it, instead of being clipped at 100%. */
             className="mx-auto flex min-h-full w-full max-w-shell flex-col px-6 pb-10"
           >
-            {/* Clears the floating pill, which stays above the overlay. */}
-            <div aria-hidden="true" className="h-24 shrink-0" />
+            {/* Clears the header row, whose burger stays above the
+                overlay and is the X that closes it. */}
+            <div aria-hidden="true" className="h-20 shrink-0 md:h-24" />
 
             <nav aria-label="Seiten">
               <ul className="flex flex-col">
@@ -290,10 +291,10 @@ export function MobileMenu({ className }: { className?: string }) {
                         href={item.href}
                         onClick={close}
                         className={cn(
-                          'flex min-h-14 items-center py-1 text-title-lg text-ink sm:text-title-xl',
+                          'flex min-h-14 items-center py-1 text-title-lg text-navy sm:text-title-xl',
                           'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
-                          'hover:text-brand-700 focus-visible:outline-2',
-                          'focus-visible:outline-offset-4 focus-visible:outline-brand-500',
+                          'hover:text-accent-sky-ink focus-visible:outline-2',
+                          'focus-visible:outline-offset-4 focus-visible:outline-navy',
                         )}
                       >
                         {item.label}
@@ -307,7 +308,13 @@ export function MobileMenu({ className }: { className?: string }) {
             <motion.div {...reveal} className="mt-8 flex flex-col gap-6">
               <span aria-hidden="true" className={DIVIDER} />
 
-              <Button href={primaryCta.href} onClick={close} magnetic={false}>
+              <Button
+                href={primaryCta.href}
+                onClick={close}
+                variant="sky"
+                icon={null}
+                magnetic={false}
+              >
                 {primaryCta.label}
               </Button>
 
@@ -379,11 +386,13 @@ export function MobileMenu({ className }: { className?: string }) {
            close, and a dangling `aria-controls` is an invalid reference. */
         aria-controls={isOpen ? menuId : undefined}
         aria-label={isOpen ? 'Menü schließen' : 'Menü öffnen'}
+        /* The header is flat and always on white now, so the burger is
+           simply navy — no state variables, nothing to invert against. */
         className={cn(
-          'relative z-10 grid size-11 place-items-center rounded-full',
-          'text-ink transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
-          'hover:bg-brand-050 focus-visible:outline-2 focus-visible:outline-offset-2',
-          'focus-visible:outline-brand-500',
+          'relative z-10 -mr-2 grid size-11 place-items-center rounded-full text-navy',
+          'transition-colors duration-[var(--duration-swift)] ease-imperial-soft',
+          'hover:bg-navy/8 focus-visible:outline-2 focus-visible:outline-offset-2',
+          'focus-visible:outline-navy',
         )}
       >
         <span aria-hidden="true" className="relative block h-4 w-5">
