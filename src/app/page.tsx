@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+
 import {
   About,
   Advantages,
@@ -12,6 +14,18 @@ import {
   TrustBar,
 } from '@/components/sections';
 import { LocalBusinessJsonLd } from '@/components/seo';
+import { SITE_DESCRIPTION, SITE_TITLE, routeMetadata } from '@/config/seo';
+
+/*
+ * Title and description are the site-level ones. Only the canonical and the
+ * social card are route-specific, and both come from the shared helper so the
+ * card keeps `og:image` and `og:site_name` (see config/seo.ts).
+ */
+export const metadata: Metadata = routeMetadata({
+  path: '/',
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+});
 
 // Section order follows CLAUDE.md 7.
 //

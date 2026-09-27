@@ -5,7 +5,7 @@ import { ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/ArrowLeft';
 import { PaperPlaneTiltIcon } from '@phosphor-icons/react/dist/ssr/PaperPlaneTilt';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import type { FormEvent } from 'react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FieldErrors } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -14,6 +14,7 @@ import { legalNav } from '@/config/navigation';
 import { cn } from '@/lib/cn';
 import {
   emptyQuoteRequest,
+  HONEYPOT_FIELD,
   quoteRequestSchema,
   quoteSteps,
   type QuoteRequest,
@@ -79,6 +80,35 @@ export function QuoteForm() {
   const [status, setStatus] = useState<Status>('editing');
 
   const busy = status === 'submitting';
+
+  /* --- bot protection, browser half -------------------------------------- */
+
+  /*
+   * Both of these are refs and not state: they are read once, at submit, and
+   * neither may ever cause a render.
+   *
+   * The server half is `src/lib/anti-spam.ts`, and it holds the thresholds. All
+   * that happens here is measuring — how long the form was open, and what is in
+   * an input no person can reach. Nothing on this side decides anything, which
+   * is what keeps the numbers out of the client bundle.
+   *
+   * The timestamp is taken in an effect rather than as `useRef(Date.now())`,
+   * which is an impure call during render. `performance.now()` and not
+   * `Date.now()` because this is a duration: a monotonic clock cannot be moved
+   * by an NTP correction or a timezone change mid-form and turn a real
+   * submission into a negative elapsed time.
+   *
+   * The `0` fallback is the safe direction to fail in. If the effect has somehow
+   * not run, the elapsed value becomes "time since the page loaded", which is
+   * larger than the real figure — so a missed measurement can only ever wave a
+   * request through, never drop a genuine one.
+   */
+  const mountedAt = useRef(0);
+  const honeypot = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    mountedAt.current = performance.now();
+  }, []);
 
   /* --- focus ------------------------------------------------------------- */
 
@@ -151,7 +181,13 @@ export function QuoteForm() {
       const response = await fetch('/api/anfrage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          ...values,
+          // Empty for a person: the input sits off-screen and outside the tab
+          // order, so only something walking the DOM ever puts a value in it.
+          [HONEYPOT_FIELD]: honeypot.current?.value ?? '',
+          elapsedMs: Math.round(performance.now() - mountedAt.current),
+        }),
       });
 
       if (!response.ok) {
@@ -280,7 +316,31 @@ export function QuoteForm() {
         <SubmissionSuccess headingRef={headingRef} />
       ) : (
         <FormProvider {...methods}>
-          <form onSubmit={handleFormSubmit} noValidate>
+          <form onSubmit={handleFormSubmit} noValidate className="relative">
+            {/* Honeypot. Moved out of sight rather than `display: none`: a bot
+                that walks the DOM fills it either way, and a headless browser
+                that only fills what it can see is precisely the caller we do
+                NOT want to catch — being invisible to it would waste the trap.
+                `relative` on the form keeps the offset from reaching the page
+                and creating horizontal scroll. Out of the tab order and out of
+                the accessibility tree, so no keyboard or screen-reader user can
+                land on it. */}
+            <div
+              aria-hidden="true"
+              className="absolute top-0 -left-[9999px] size-px overflow-hidden"
+            >
+              <label htmlFor="quote-website">Website</label>
+              <input
+                ref={honeypot}
+                id="quote-website"
+                name={HONEYPOT_FIELD}
+                type="text"
+                defaultValue=""
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
+
             <StepIndicator
               current={step}
               furthest={furthest}

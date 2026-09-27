@@ -18,6 +18,16 @@ import { categoryAnchorHref } from '@/content/services';
 export const BUSINESS_ID = absoluteUrl('/#organisation');
 
 /**
+ * The site node.
+ *
+ * Separate from the company on purpose: schema.org models the organisation and
+ * the website it publishes as two things, and collapsing them means the graph
+ * cannot say that this domain belongs to that GmbH. It is the edge a search
+ * engine follows to tie the domain to the business entity.
+ */
+export const WEBSITE_ID = absoluteUrl('/#website');
+
+/**
  * A service category's node id.
  *
  * Anchored to the category's section on the landing page, because since the

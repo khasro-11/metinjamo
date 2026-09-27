@@ -14,8 +14,12 @@
      - Hosting-Anbieter + Auftragsverarbeitungsvertrag (Art. 28 DSGVO)
      - Serverstandort
      - Umfang und Löschfrist der Server-Logfiles — hängt am Hoster
-     - Mail-Zustellung des Formulars (Resend / SMTP / Formular-Dienst)
-       + AVV; siehe den DELIVERY-Block in app/api/anfrage/route.ts
+     - EmailJS: Versandweg, Firmierung (EmailJS Pte. Ltd., Singapur) und
+       Verarbeitungsort (USA, AWS) stehen in Abschnitt 06 und 07. Offen ist
+       nur noch der AVV nach Art. 28 DSGVO und die Anschrift des Anbieters,
+       die keiner der veröffentlichten Texte nennt. Beim Vertragsabschluss
+       sind die eingetragenen Angaben gegen den unterzeichneten Vertrag zu
+       prüfen. Schritt für Schritt in docs/emailjs.md, Abschnitt 7.
      - Aufbewahrungsfristen: Anfragen ohne Auftrag vs. Handels- und
        steuerrechtliche Pflichten (§ 257 HGB, § 147 AO)
      - Stand-Datum dieser Erklärung, sobald der Text final ist
@@ -58,12 +62,25 @@ import {
   Pending,
   createSectionIndex,
 } from '@/components/legal';
+import { BreadcrumbJsonLd } from '@/components/seo';
 import { company } from '@/config/company';
+import { routeMetadata } from '@/config/seo';
 import { CONSENT_STORAGE_KEY } from '@/lib/consent';
 
+const PAGE_TITLE = 'Datenschutzerklärung';
+const PAGE_DESCRIPTION = `Wie ${company.legalName} personenbezogene Daten auf dieser Website verarbeitet: Verantwortlicher, Server-Logfiles, Kontaktaufnahme, Speicherdauer und Ihre Rechte nach der DSGVO.`;
+
+/* Per-route canonical and Open Graph URL. See the note in impressum/page.tsx. */
 export const metadata: Metadata = {
-  title: 'Datenschutzerklärung',
-  description: `Wie ${company.legalName} personenbezogene Daten auf dieser Website verarbeitet: Verantwortlicher, Server-Logfiles, Kontaktaufnahme, Speicherdauer und Ihre Rechte nach der DSGVO.`,
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  ...routeMetadata({
+    path: '/datenschutz',
+    // The tab label gets the brand from the title template. Open Graph does
+    // not, so the brand is spelled out for the shared link.
+    title: `${PAGE_TITLE} | ${company.shortName}`,
+    description: PAGE_DESCRIPTION,
+  }),
 };
 
 const sections = createSectionIndex([
@@ -102,6 +119,7 @@ export default function DatenschutzPage() {
 
   return (
     <LegalPage>
+      <BreadcrumbJsonLd trail={[{ name: PAGE_TITLE }]} />
       <LegalHeader
         eyebrow="Rechtliches"
         title="Datenschutzerklärung"
@@ -369,22 +387,77 @@ export default function DatenschutzPage() {
                 bindet kein Captcha eines Drittanbieters ein und überträgt
                 keine Daten an Werbenetzwerke.
               </p>
+              <p>
+                Damit die Anfrage unser Postfach erreicht, setzen wir den
+                Dienst <strong>EmailJS</strong> als Auftragsverarbeiter ein.
+                Der Dienst wird ausschließlich von unserem Server aus
+                angesprochen: <strong>Ihr Gerät baut zu ihm keine Verbindung
+                auf</strong>, Ihre IP-Adresse wird ihm nicht übermittelt, und
+                es wird zu diesem Zweck nichts in Ihrem Browser gespeichert.
+                Übermittelt werden ausschließlich die Angaben, die Sie im
+                Formular gemacht haben. Eine automatische Bestätigungsmail
+                versenden wir nicht.
+              </p>
+              <p>
+                Anbieter des Dienstes ist die
+                <strong> EmailJS Pte. Ltd.</strong> mit Sitz in Singapur. Die
+                Verarbeitung findet nach Angaben des Anbieters auf Servern in
+                den <strong>USA</strong> statt, die von Amazon Web Services
+                betrieben werden. Ihre Angaben verlassen damit den
+                Europäischen Wirtschaftsraum. Grundlage der Übermittlung sind
+                die Standardvertragsklauseln der EU-Kommission nach
+                Art. 46 Abs. 2 lit. c DSGVO.
+              </p>
+              <p>
+                Gegen automatisierte Massenzuschriften prüfen wir beim
+                Absenden, ob ein für Sie unsichtbares Feld ausgefüllt wurde und
+                wie lange das Formular geöffnet war, und begrenzen die Zahl der
+                Anfragen pro Anschluss. Dazu speichern wir für höchstens zehn
+                Minuten einen nicht zurückrechenbaren Prüfwert Ihrer
+                IP-Adresse im Arbeitsspeicher — die Adresse selbst wird dabei
+                nicht gespeichert. Rechtsgrundlage ist unser berechtigtes
+                Interesse an der Funktionsfähigkeit des Formulars nach
+                Art. 6 Abs. 1 lit. f DSGVO. Ein Captcha eines Drittanbieters
+                setzen wir dafür nicht ein.
+              </p>
             </LegalProse>
 
-            {/* TODO (Kunde/Projekt): Der Versandweg des Formulars steht noch
-                nicht fest — siehe den DELIVERY-Block in
-                app/api/anfrage/route.ts. Sobald der Dienst gewählt ist, hier
-                eintragen: Firmierung, Anschrift, AV-Vertrag und, falls der
-                Anbieter außerhalb der EU verarbeitet, die Rechtsgrundlage der
-                Übermittlung. */}
+            {/* Firmierung, Sitz und Verarbeitungsort stammen aus den am
+                27.09.2026 veröffentlichten Rechtstexten des Anbieters:
+                Auftragsverarbeitungsvertrag (Entität, Standardvertragsklauseln,
+                Übermittlung in die USA) und Datenschutzerklärung (Server in
+                den USA, betrieben von AWS).
+
+                TODO (Kunde): AVV abschließen. Beim Abschluss die Angaben oben
+                gegen den tatsächlich unterzeichneten Vertrag prüfen und die
+                Anschrift des Anbieters nachtragen — die veröffentlichen beide
+                Texte nicht. Eine falsche Angabe an dieser Stelle ist selbst
+                ein Verstoß. Anleitung: docs/emailjs.md, Abschnitt 7. */}
             <div className="mt-6">
               <DataCard>
                 <DataRow term="Zustellung der Anfrage">
-                  <Pending>Mail-Dienstleister — noch offen</Pending>
+                  EmailJS — aufgerufen von unserem Server, nicht von Ihrem
+                  Gerät
+                </DataRow>
+
+                <DataRow term="Firmierung und Sitz">
+                  EmailJS Pte. Ltd., Singapur
+                </DataRow>
+
+                <DataRow term="Anschrift des Anbieters">
+                  <Pending>Aus dem AV-Vertrag zu übernehmen</Pending>
                 </DataRow>
 
                 <DataRow term="Auftragsverarbeitung">
                   <Pending>AV-Vertrag nach Art. 28 DSGVO — noch offen</Pending>
+                </DataRow>
+
+                <DataRow term="Ort der Verarbeitung">
+                  USA (Amazon Web Services)
+                </DataRow>
+
+                <DataRow term="Drittlandübermittlung">
+                  Auf Grundlage der EU-Standardvertragsklauseln
                 </DataRow>
               </DataCard>
             </div>
@@ -432,9 +505,9 @@ export default function DatenschutzPage() {
             <p>
               Darüber hinaus geben wir Daten an Dienstleister weiter, die für
               uns als Auftragsverarbeiter nach Art. 28 DSGVO tätig sind — das
-              sind der Hosting-Anbieter und der Dienst, über den die
-              Formularanfragen zugestellt werden. Beide sind vertraglich an
-              unsere Weisungen gebunden.
+              sind der Hosting-Anbieter und EmailJS, der Dienst, über den die
+              Formularanfragen zugestellt werden (Abschnitt 06). Beide sind
+              vertraglich an unsere Weisungen gebunden.
             </p>
             <p>
               Wir verkaufen keine Daten und geben sie nicht zu Werbezwecken an
@@ -443,14 +516,18 @@ export default function DatenschutzPage() {
             </p>
           </LegalProse>
 
-          {/* TODO (Projekt): Sobald Hosting und Mailversand feststehen, hier
-              eine abschließende Liste der Auftragsverarbeiter mit Firmierung
-              und Zweck ergänzen. Eine allgemeine Beschreibung reicht für die
-              Informationspflicht nach Art. 13 Abs. 1 lit. e DSGVO nicht aus. */}
+          {/* TODO (Projekt): Eine allgemeine Beschreibung reicht für die
+              Informationspflicht nach Art. 13 Abs. 1 lit. e DSGVO nicht aus.
+              Die Liste ist erst abschließend, wenn beide Zeilen unten eine
+              Firmierung tragen. */}
           <div className="mt-6">
             <DataCard>
-              <DataRow term="Auftragsverarbeiter">
-                <Pending>Abschließende Liste — noch offen</Pending>
+              <DataRow term="Hosting">
+                <Pending>Anbieter — noch offen</Pending>
+              </DataRow>
+
+              <DataRow term="Zustellung der Formularanfragen">
+                EmailJS Pte. Ltd., Singapur — Verarbeitung in den USA
               </DataRow>
             </DataCard>
           </div>
@@ -506,8 +583,13 @@ export default function DatenschutzPage() {
               etwa eine Karte zur Anfahrt oder ein Messenger-Kontakt —, bei
               denen Ihre IP-Adresse an den jeweiligen Anbieter übertragen
               würde. <strong>Derzeit ist kein solcher Dienst eingebunden</strong>;
-              Ihre Entscheidung greift, sobald einer hinzukommt. Bis dahin wird
-              unabhängig von Ihrer Auswahl nichts an Dritte übertragen.
+              Ihre Entscheidung greift, sobald einer hinzukommt. Bis dahin
+              überträgt Ihr Gerät unabhängig von Ihrer Auswahl nichts an
+              Dritte. Die Zustellung Ihrer Formularanfrage läuft über einen
+              Dienstleister, der ausschließlich von unserem Server aus
+              angesprochen wird und mit dem Ihr Browser keinen Kontakt hat —
+              deshalb ist dafür keine Einwilligung erforderlich
+              (Abschnitt 06).
             </p>
             <p>
               Ihre Auswahl speichern wir ausschließlich lokal in Ihrem Browser

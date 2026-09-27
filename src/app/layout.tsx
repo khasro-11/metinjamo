@@ -1,9 +1,10 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google';
 
 import { ConsentManager } from '@/components/consent';
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { company } from '@/config/company';
+import { OPEN_GRAPH_BASE, SITE_DESCRIPTION, SITE_TITLE } from '@/config/seo';
 
 import './globals.css';
 
@@ -32,42 +33,108 @@ const display = Playfair_Display({
   display: 'swap',
 });
 
-const TITLE = `${company.legalName} — Gebäudereinigung in ${company.address.city}`;
-const DESCRIPTION = `Gebäudeservice für Hausverwaltungen, Gewerbeobjekte und Eigentümer in ${company.serviceArea.primary}.`;
+export const viewport: Viewport = {
+  /*
+   * The top of every page is paper: the header paints no background of its own
+   * and the hero underneath it is white. A brand-coloured browser chrome would
+   * sit above that as a navy band the page never picks up again.
+   */
+  themeColor: '#fbfcfd',
+  /*
+   * Light only (CLAUDE.md 4). Declared rather than left to default, because an
+   * undeclared scheme invites a browser or an extension to force-darken form
+   * controls into colours no contrast on this site was ever measured against.
+   */
+  colorScheme: 'light',
+};
 
 export const metadata: Metadata = {
   // Origin lives in company.ts, so metadata, sitemap, robots and the
   // LocalBusiness JSON-LD can never disagree about the canonical host.
   metadataBase: new URL(company.site.url),
   title: {
-    default: TITLE,
+    default: SITE_TITLE,
     template: `%s | ${company.shortName}`,
   },
-  description: DESCRIPTION,
-  alternates: { canonical: '/' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: company.legalName,
-    url: '/',
-    title: TITLE,
-    description: DESCRIPTION,
-    images: [
-      {
-        url: company.site.ogImage.path,
-        width: company.site.ogImage.width,
-        height: company.site.ogImage.height,
-        alt: company.site.ogImage.alt,
-      },
+  description: SITE_DESCRIPTION,
+  applicationName: company.shortName,
+  authors: [{ name: company.legalName, url: company.site.url }],
+  creator: company.legalName,
+  publisher: company.legalName,
+  /*
+   * Every phone number on this site is already an explicit `tel:` link. With
+   * detection left on, iOS also linkifies the other digit runs in the imprint
+   * (HRB 39367, the postal code, the share capital) into phone links that dial
+   * nothing.
+   */
+  formatDetection: { telephone: false, address: false, email: false },
+  /*
+   * Defaults would serve a 160-character snippet and a thumbnail-sized image.
+   * A local service business is found through its rich result, so the snippet
+   * and the image preview are unthrottled here.
+   */
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+  manifest: '/manifest.webmanifest',
+  /*
+   * The client-delivered icon set, used as delivered (CLAUDE.md 4). The
+   * `.ico` carries 16, 32, 48 and 64px frames, which covers every slot a
+   * browser asks for, so no SVG cut is declared: there is none in the
+   * delivery, and a vector rebuilt here would be a second copy of the mark
+   * free to drift from these four files.
+   *
+   * `apple-touch-icon.png` is the one file not passed through byte for byte.
+   * The delivered cut is transparent and iOS composites a transparent home
+   * screen icon onto black, which would put a dark blue mark on a black tile.
+   * It carries the same artwork on an opaque white ground, which is the
+   * ground the logo is drawn for anyway: its mullions and its tools are white.
+   *
+   * The Next.js default `app/favicon.ico` is gone, or it would keep winning
+   * the `/favicon.ico` route.
+   */
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '16x16 32x32 48x48 64x64', type: 'image/x-icon' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  /*
+   * No `alternates.canonical` and no `openGraph.url` here, deliberately.
+   *
+   * Metadata is inherited, so a canonical declared on the layout is emitted by
+   * every page that does not set its own — which is how `/impressum` and
+   * `/datenschutz` came to tell Google they were duplicates of the homepage
+   * while the sitemap listed them as pages in their own right. Each route now
+   * declares its own. A route that forgets one emits none, and an absent
+   * canonical is a hint Google can work around; a wrong one is an instruction
+   * to drop the page.
+   *
+   * These stay as the values a route inherits when it sets nothing of its own.
+   * A route that DOES set its own goes through `routeMetadata`, because Next
+   * replaces a nested metadata object rather than merging it.
+   */
+  openGraph: {
+    ...OPEN_GRAPH_BASE,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
   // No Twitter/X account to attribute — `summary_large_image` alone is what
   // makes the card render at full width, and inventing a @handle would be a
   // claim about an account that does not exist.
   twitter: {
     card: 'summary_large_image',
-    title: TITLE,
-    description: DESCRIPTION,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     images: [company.site.ogImage.path],
   },
 };

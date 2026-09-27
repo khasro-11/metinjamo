@@ -64,9 +64,9 @@ export interface SiteIdentity {
    * sitemap, robots.txt and the LocalBusiness JSON-LD, so the site can never
    * publish two different canonical hosts.
    *
-   * TODO (client): the production domain is NOT confirmed yet (CLAUDE.md 12).
-   * This is the address the client already uses for mail; it is the best
-   * available guess, and it is one line to change once the domain is decided.
+   * Confirmed by the client. It is no longer a guess, so the canonical host,
+   * the sitemap, robots.txt and the absolute URLs in the JSON-LD all rest on a
+   * decided value rather than on the mail domain standing in for one.
    */
   readonly url: string;
   /** Open Graph card, 1200x630, served from /public. */

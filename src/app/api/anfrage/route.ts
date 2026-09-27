@@ -1,13 +1,32 @@
 /**
- * POST /api/anfrage — receives a quote request from the landing-page form.
+ * POST /api/anfrage — receives a quote request from the landing-page form and
+ * delivers it to the company mailbox.
  *
  * The client already validated against `quoteRequestSchema`, and that check is
  * treated as worth nothing here: this endpoint is public, so the body is parsed
  * against the same schema again before anything is done with it.
  *
- * Nothing is sent anywhere yet. See the DELIVERY block below.
+ * Delivery runs through EmailJS, called server-side — see `src/lib/emailjs.ts`
+ * for why it is the REST API and not the browser SDK, and `docs/emailjs.md` for
+ * the dashboard setup the credentials refer to.
+ *
+ * What this handler does NOT do, on purpose: no database write, no analytics
+ * event, no third-party pixel, and no logging of names, addresses, phone
+ * numbers or messages. The delivered mail is meant to be the only copy of the
+ * request that exists — that is what the privacy note on the form promises, and
+ * every log line below is written to keep it true.
  */
 
+import {
+  antiSpamSchema,
+  checkRateLimit,
+  looksAutomated,
+} from '@/lib/anti-spam';
+import {
+  MailConfigError,
+  MailDeliveryError,
+  sendQuoteRequest,
+} from '@/lib/emailjs';
 import { quoteRequestSchema } from '@/lib/quote-request';
 
 /**
@@ -20,11 +39,15 @@ export const dynamic = 'force-dynamic';
 /** Roughly 8 KB — the schema's own maxima put a valid body far below this. */
 const MAX_BODY_BYTES = 8_192;
 
-function json(body: unknown, status: number): Response {
+function json(
+  body: unknown,
+  status: number,
+  headers: HeadersInit = {},
+): Response {
   return Response.json(body, {
     status,
     // A quote request must never be cached by a CDN or a shared proxy.
-    headers: { 'Cache-Control': 'no-store' },
+    headers: { 'Cache-Control': 'no-store', ...headers },
   });
 }
 
@@ -38,6 +61,18 @@ export async function POST(request: Request): Promise<Response> {
     return json({ ok: false, error: 'payload_too_large' }, 413);
   }
 
+  /*
+   * Before the body is read, and before a single request is spent at the
+   * provider. Delivery is metered, so the rate limit protects the form's
+   * availability and not just the inbox.
+   */
+  const rateLimit = await checkRateLimit(request);
+  if (!rateLimit.allowed) {
+    return json({ ok: false, error: 'rate_limited' }, 429, {
+      'Retry-After': String(rateLimit.retryAfterSeconds),
+    });
+  }
+
   let payload: unknown;
   try {
     const raw = await request.text();
@@ -48,6 +83,31 @@ export async function POST(request: Request): Promise<Response> {
   } catch {
     return json({ ok: false, error: 'malformed_json' }, 400);
   }
+
+  /* --- bot checks ------------------------------------------------------- */
+
+  const envelope = antiSpamSchema.safeParse(payload);
+
+  if (!envelope.success || looksAutomated(envelope.data)) {
+    /*
+     * Answered with a success, not with an error.
+     *
+     * A bot that is told it was caught retries against the check it just
+     * learned about; one that is told "thank you" moves on. The cost of the lie
+     * is that a false positive loses a real request silently, which is why the
+     * two thresholds are set where a person cannot trip them (empty hidden
+     * field, three seconds on a five-step form) — and why this line exists, so
+     * a suspected false positive is at least diagnosable from the platform log.
+     */
+    console.warn(
+      `[anfrage] dropped as automated (reason=${
+        envelope.success ? 'trap' : 'envelope'
+      })`,
+    );
+    return json({ ok: true }, 200);
+  }
+
+  /* --- validation ------------------------------------------------------- */
 
   const parsed = quoteRequestSchema.safeParse(payload);
 
@@ -70,57 +130,46 @@ export async function POST(request: Request): Promise<Response> {
 
   const quoteRequest = parsed.data;
 
-  /* ======================================================================
-     TODO — MAIL PROVIDER. Nothing leaves this process until this is wired.
-     ======================================================================
+  /* --- delivery --------------------------------------------------------- */
 
-     `quoteRequest` is validated and ready to send. What is still missing is a
-     decision the client has to make (CLAUDE.md 6 and 12): Resend, plain SMTP
-     on the company mailbox, or a form service. Hosting is undecided too, and
-     the two answers are related.
+  try {
+    const { confirmationSent } = await sendQuoteRequest(quoteRequest);
 
-     Whatever is chosen, this is what has to happen here:
+    // Non-identifying, so it stays useful for "does the form work at all"
+    // without putting personal data into a platform log.
+    console.info(
+      `[anfrage] delivered: ${quoteRequest.serviceCategories.length} ` +
+        `category/-ies, ${quoteRequest.services.length} service(s), ` +
+        `frequency=${quoteRequest.frequency}, type=${quoteRequest.propertyType}, ` +
+        `confirmation=${confirmationSent ? 'sent' : 'skipped'}`,
+    );
 
-       1. Send the request to the company mailbox. The subject line should
-          carry the postal code and the first service category, so the inbox
-          stays sortable without opening every mail. The body should print the
-          selected categories with the individual services nested under them,
-          the same shape the review step shows — a flat list of eighteen
-          possible slugs loses which category each one was chosen under. Set
-          Reply-To to
-          `quoteRequest.email` so a reply reaches the customer rather than the
-          sending domain.
-       2. Send a confirmation to `quoteRequest.email` restating what was
-          submitted. Under Art. 13 DSGVO the sender has to be told what is
-          stored, why and for how long — the confirmation mail is the normal
-          place for that, and it links the Datenschutzerklärung.
-       3. Throw on failure, and return 502 rather than 202. The form's success
-          panel tells the customer their request has arrived; claiming that
-          falsely is worse than showing the error state.
+    return json({ ok: true }, 200);
+  } catch (cause) {
+    if (cause instanceof MailConfigError) {
+      /*
+       * A deployment fault, not a visitor fault: the credentials are missing or
+       * incomplete. Loud on purpose — silently dropping leads is the one failure
+       * mode this endpoint must never have.
+       */
+      console.error(`[anfrage] NOT DELIVERED — ${cause.message}`);
+      return json({ ok: false, error: 'mail_not_configured' }, 503);
+    }
 
-     Three things still have to be settled here before going live:
-       - Spam protection. No third-party captcha without a DSGVO assessment; a
-         submit-timing check plus a honeypot field covers most of it and
-         tracks nobody. Left out rather than half-built.
-       - Rate limiting per IP. Needs the hosting decision first — the store
-         depends on the platform.
-       - Retention. The mailbox becomes the record of the request, so how long
-         it is kept has to match what the Datenschutzerklärung states.
+    if (cause instanceof MailDeliveryError) {
+      console.error(
+        `[anfrage] NOT DELIVERED — ${cause.message}` +
+          (cause.status === null ? '' : ` (status ${cause.status})`),
+      );
+      return json({ ok: false, error: 'mail_failed' }, 502);
+    }
 
-     Deliberately NOT done here: no database write, no analytics event, no
-     third-party pixel, and no logging of names, addresses or messages. The
-     only copy of this data should be the mail — that is what the form's
-     privacy note promises.
-     ====================================================================== */
-
-  // Non-identifying, so it stays useful for "does the form work at all"
-  // without putting personal data into a platform log.
-  console.info(
-    `[anfrage] validated request: ${quoteRequest.serviceCategories.length} ` +
-      `category/-ies, ${quoteRequest.services.length} service(s), ` +
-      `frequency=${quoteRequest.frequency}, type=${quoteRequest.propertyType}`,
-  );
-
-  // 202: accepted and valid, but delivery genuinely has not happened yet.
-  return json({ ok: true }, 202);
+    // Unexpected. The message may be anything, so only its type is logged.
+    console.error(
+      `[anfrage] NOT DELIVERED — unexpected ${
+        cause instanceof Error ? cause.name : typeof cause
+      }`,
+    );
+    return json({ ok: false, error: 'mail_failed' }, 502);
+  }
 }

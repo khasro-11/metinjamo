@@ -35,11 +35,32 @@ import {
   Pending,
   createSectionIndex,
 } from '@/components/legal';
+import { BreadcrumbJsonLd } from '@/components/seo';
 import { PENDING_LABEL, company } from '@/config/company';
+import { routeMetadata } from '@/config/seo';
 
+const PAGE_TITLE = 'Impressum';
+const PAGE_DESCRIPTION = `Anbieterkennzeichnung nach § 5 DDG für ${company.legalName}, ${company.address.oneLine}.`;
+
+/*
+ * The canonical and the Open Graph URL are declared per route. Inherited from
+ * the layout they resolved to the homepage, which told Google this page was a
+ * duplicate of `/` while the sitemap listed it as a page of its own.
+ *
+ * `openGraph.title` is spelled out because the title template that produces
+ * the tab label does not reach Open Graph: without it, a shared link to the
+ * imprint carried the homepage's headline.
+ */
 export const metadata: Metadata = {
-  title: 'Impressum',
-  description: `Anbieterkennzeichnung nach § 5 DDG für ${company.legalName}, ${company.address.oneLine}.`,
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  ...routeMetadata({
+    path: '/impressum',
+    // The tab label gets the brand from the title template. Open Graph does
+    // not, so the brand is spelled out for the shared link.
+    title: `${PAGE_TITLE} | ${company.shortName}`,
+    description: PAGE_DESCRIPTION,
+  }),
 };
 
 /**
@@ -76,6 +97,7 @@ export default function ImpressumPage() {
 
   return (
     <LegalPage>
+      <BreadcrumbJsonLd trail={[{ name: PAGE_TITLE }]} />
       <LegalHeader
         eyebrow="Rechtliches"
         title="Impressum"

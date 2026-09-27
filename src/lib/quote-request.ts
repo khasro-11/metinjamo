@@ -155,6 +155,21 @@ export const quoteRequestSchema = z.object({
 
 export type QuoteRequest = z.infer<typeof quoteRequestSchema>;
 
+/**
+ * Name of the honeypot input.
+ *
+ * Lives here, next to the rest of the wire format, for the same reason the
+ * schema does: the form renders an input with this name and the endpoint
+ * rejects a request in which it is non-empty, and the trap is worth nothing if
+ * the two ever disagree about what it is called. It looks like a field a
+ * contact form would plausibly have, because that is what makes a bot fill it.
+ *
+ * The *thresholds* of the bot check are NOT here — they are server-side only
+ * (`src/lib/anti-spam.ts`). Shipping them to the browser would hand a bot the
+ * exact numbers to stay under.
+ */
+export const HONEYPOT_FIELD = 'website';
+
 /** Field names, for per-step validation. */
 export type QuoteRequestField = keyof QuoteRequest;
 

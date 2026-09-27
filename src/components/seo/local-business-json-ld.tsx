@@ -1,7 +1,8 @@
 import { absoluteUrl, company, regularOpeningHours } from '@/config/company';
+import { SITE_DESCRIPTION } from '@/config/seo';
 import { categoryAnchorHref, serviceCategories } from '@/content/services';
 
-import { BUSINESS_ID, serviceNodeId } from './schema';
+import { BUSINESS_ID, WEBSITE_ID, serviceNodeId } from './schema';
 
 /**
  * `ProfessionalService` + `Service` structured data (CLAUDE.md 9).
@@ -27,6 +28,11 @@ import { BUSINESS_ID, serviceNodeId } from './schema';
  *   one place a customer never sees it. `regularOpeningHours` filters them out
  *   at the source.
  * - `foundingDate` / `numberOfEmployees` — still open with the client.
+ * - `sameAs` — no Google Business Profile, no social account has been handed
+ *   over yet. It is the single highest-value property still missing from this
+ *   graph and goes in the moment the profile URL exists (CLAUDE.md 12).
+ * - `potentialAction` / `SearchAction` on the site node — there is no site
+ *   search to point it at.
  *
  * Rendered as a plain script tag rather than through next/script: it is static
  * markup with no execution and belongs in the initial HTML, where crawlers
@@ -54,6 +60,19 @@ function buildSchema() {
     alternateName: company.shortName,
     url: absoluteUrl('/'),
     image: absoluteUrl(company.site.ogImage.path),
+    /*
+     * The square mark, not the wordmark: Google wants a logo it can crop into
+     * a knowledge panel and a result row, and `logo-imperial.svg` is a wide
+     * lockup that survives neither. This is the same artwork as the favicon,
+     * which is also what a search result shows beside the domain, so the two
+     * places a reader meets the brand in a SERP finally agree.
+     */
+    logo: {
+      '@type': 'ImageObject',
+      url: absoluteUrl('/favicon-512.png'),
+      width: 512,
+      height: 512,
+    },
     telephone: company.phone.e164,
     email: company.email.address,
     address: {
@@ -128,9 +147,24 @@ function buildSchema() {
     },
   }));
 
+  /*
+   * Names the domain and hands it to the company as its publisher. Without it
+   * the graph describes a business and, separately, a pile of services, with
+   * nothing stating that this website is the business's own.
+   */
+  const website = {
+    '@type': 'WebSite',
+    '@id': WEBSITE_ID,
+    url: absoluteUrl('/'),
+    name: company.legalName,
+    description: SITE_DESCRIPTION,
+    inLanguage: 'de-DE',
+    publisher: { '@id': BUSINESS_ID },
+  };
+
   return {
     '@context': 'https://schema.org',
-    '@graph': [business, ...serviceNodes],
+    '@graph': [website, business, ...serviceNodes],
   };
 }
 

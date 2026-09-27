@@ -47,8 +47,11 @@ npm run dev          # http://localhost:3000
 Vor jedem Commit sollten `lint`, `typecheck` und `build` grün sein. Es gibt noch
 keine automatisierte Test-Suite — der Build ist aktuell das einzige Netz.
 
-Environment-Variablen werden bislang **keine** gebraucht. Das ändert sich mit
-dem Mailversand (siehe [Formular](#formular--api)).
+Environment-Variablen: Der Mailversand des Formulars braucht fünf davon. Die
+Vorlage steht in [`.env.example`](./.env.example), die Einrichtung in
+[`docs/emailjs.md`](./docs/emailjs.md). Ohne sie läuft die Seite normal, nur das
+Formular antwortet mit einer Fehlermeldung statt mit einer Erfolgsmeldung —
+siehe [Formular](#formular--api).
 
 ### Interne Referenzseite
 
@@ -83,6 +86,9 @@ src/
   config/              company.ts, navigation.ts
   content/             services.ts, faq.ts
   lib/                 cn.ts, motion.ts, quote-request.ts
+                       emailjs.ts, quote-mail.ts, anti-spam.ts  (Mailversand)
+docs/
+  emailjs.md           Einrichtung des Mailversands — Dashboard-Schritte
 ```
 
 ### Zwei Regeln, die beim Weiterbauen wichtig sind
@@ -160,18 +166,51 @@ Der Ablauf: `QuoteForm` (Client) validiert gegen `src/lib/quote-request.ts` und
 schickt an `POST /api/anfrage`. Der Endpunkt validiert **dieselbe** Schema-Datei
 noch einmal, weil er öffentlich ist.
 
-> **Der Endpunkt versendet aktuell nichts.** Die Anfrage wird geprüft und dann
-> verworfen. Der Mailversand ist nicht angebunden, weil Hosting und Mailweg noch
-> nicht entschieden sind. Der ausführliche TODO-Block in
-> `src/app/api/anfrage/route.ts` beschreibt, was dort passieren muss.
->
-> **Das Formular darf nicht live gehen, bevor das erledigt ist.** Die
-> Erfolgsmeldung sagt dem Kunden, seine Anfrage sei angekommen. Solange das
-> nicht stimmt, ist es eine Falschaussage — und die Anfrage ist weg.
+Zugestellt wird über **EmailJS**, und zwar **serverseitig** über deren
+REST-API (`src/lib/emailjs.ts`) — nicht über das Browser-SDK. Der Grund steht
+ausführlich im Kopf der Datei: beim Versand aus dem Browser würde das Gerät des
+Besuchers eine Verbindung zu `api.emailjs.com` aufbauen und dabei seine
+IP-Adresse in ein Drittland übertragen, bevor er irgendetwas bestätigt hat. Das
+wäre einwilligungspflichtig und würde ein Cookie-Banner erzwingen. So spricht
+nur unser Server mit dem Dienst.
 
-Ebenfalls offen und im selben Block beschrieben: Spamschutz (Honeypot +
-Zeitprüfung, kein Third-Party-Captcha ohne DSGVO-Prüfung), Rate-Limiting und
-Aufbewahrungsfrist.
+Pro Anfrage gehen zwei Mails raus:
+
+| Mail | Verhalten bei Fehlschlag |
+| --- | --- |
+| interne Benachrichtigung an `info@imperial-gmbh.com`, `Reply-To` auf den Absender | `502`, das Formular zeigt die Fehlermeldung mit der Telefonnummer |
+| Bestätigung an den Absender | wird nur geloggt; die Anfrage gilt als zugestellt |
+
+Die Unterscheidung ist Absicht: die interne Mail **ist** die Anfrage. Die
+Bestätigung ist Höflichkeit — sie zum Fehler zu machen würde den Kunden
+auffordern, noch einmal abzusenden, und eine doppelte Anfrage erzeugen.
+
+Der Inhalt beider Mails wird in `src/lib/quote-mail.ts` gebaut, nicht im
+EmailJS-Dashboard. Die Vorlagen dort enthalten nur Platzhalter — jede
+Firmenangabe kommt aus `company.ts`, sonst wäre die Vorlage eine zweite Kopie
+davon, die niemand mitpflegt.
+
+> **Ohne die fünf Umgebungsvariablen antwortet der Endpunkt mit
+> `503 mail_not_configured`** und das Formular zeigt seine Fehlermeldung. Es
+> behauptet nie, eine Anfrage sei angekommen, wenn sie es nicht ist.
+> Einrichtung: [`docs/emailjs.md`](./docs/emailjs.md).
+
+**Spamschutz** (`src/lib/anti-spam.ts`): ein Honeypot-Feld, eine Zeitprüfung
+(unter 3 s = verworfen) und ein Rate-Limit von 5 Anfragen pro 10 Minuten pro
+Anschluss. Kein Captcha eines Drittanbieters — das bräuchte ein Banner und eine
+eigene DSGVO-Prüfung. Eine als automatisiert erkannte Anfrage bekommt `200`
+und keine Mail: ein Bot, dem man sagt, dass er erkannt wurde, versucht es
+anders. Die Zeile `dropped as automated` im Log macht den Fall trotzdem
+auffindbar.
+
+Das Rate-Limit liegt im Arbeitsspeicher des Prozesses und ist damit
+**pro Instanz** — zwei Serverless-Instanzen zählen getrennt, ein Deploy setzt
+zurück. Das ist bewusst so: der gemeinsame Speicher, der das lösen würde, hängt
+an der Hosting-Entscheidung. Der TODO dazu steht in der Datei.
+
+Noch offen: die **Aufbewahrungsfrist** für Anfragen. Der Posteingang ist der
+Speicherort — was die Datenschutzerklärung als Frist nennt, muss dort auch
+gelebt werden.
 
 ---
 
@@ -189,7 +228,9 @@ wird erkannt, keine Build-Konfiguration nötig. Was in beiden Fällen zu tun ist
    — steht sie falsch, zeigen alle absoluten URLs auf die falsche Domain.
 2. Domain verbinden, HTTPS erzwingen, `www` und Apex auf eine Variante
    umleiten (die kanonische Variante muss zu `company.site.url` passen).
-3. Umgebungsvariablen des Mailproviders setzen, sobald der feststeht.
+3. Die fünf `EMAILJS_*`-Umgebungsvariablen setzen
+   ([`docs/emailjs.md`](./docs/emailjs.md)). Danach eine echte Testanfrage
+   absenden und prüfen, dass beide Mails ankommen.
 4. Nach dem ersten Deploy: `/sitemap.xml` und `/robots.txt` im Browser prüfen,
    Sitemap in der Google Search Console einreichen.
 
@@ -208,9 +249,17 @@ Analytics ergänzt, prüft vorher, ob damit ein Banner nötig wird — cookieles
 
 ### Blocker — ohne diese Punkte darf die Seite nicht online
 
-- [ ] **Mailversand des Formulars** anbinden (`src/app/api/anfrage/route.ts`).
-      Ohne das gehen alle Anfragen verloren, während dem Kunden Erfolg gemeldet
-      wird.
+- [ ] **EmailJS einrichten** — Dashboard, zwei Vorlagen, fünf
+      Umgebungsvariablen. Anleitung: [`docs/emailjs.md`](./docs/emailjs.md).
+      Der Code ist fertig; ohne die Einrichtung antwortet das Formular mit
+      einer Fehlermeldung und es geht keine Anfrage verloren, aber es kommt
+      auch keine an.
+- [ ] **AV-Vertrag mit EmailJS** abschließen (Art. 28 DSGVO) und Firmierung
+      samt Sitz in die Datenschutzerklärung übernehmen, Abschnitte 06 und 07.
+      Ohne AVV darf der Dienst nicht produktiv laufen.
+- [ ] **Kontingent bei EmailJS prüfen.** Jede Anfrage verbraucht zwei
+      Sendungen; der kostenlose Tarif reicht für etwa 100 Anfragen im Monat.
+      Ist es erschöpft, sieht der Besucher die Fehlermeldung.
 - [ ] **Leistungskatalog vom Kunden bestätigen** (`src/content/services.ts`).
       Der aktuelle Katalog ist ein Vorschlag. Eine beworbene Leistung, die nicht
       angeboten wird, ist ein Problem nach § 5 UWG.
@@ -220,8 +269,9 @@ Analytics ergänzt, prüft vorher, ob damit ein Banner nötig wird — cookieles
       und die Form der Leistungsnachweise.
 - [ ] **Domain festlegen** und `company.site.url` setzen.
 - [ ] **Hosting entscheiden**, dann die offenen Stellen in der
-      Datenschutzerklärung schließen (Hoster, Logfiles, Versandweg,
-      Speicherfristen, Stand-Datum).
+      Datenschutzerklärung schließen (Hoster, Logfiles, Speicherfristen,
+      Stand-Datum) und das Rate-Limit aus dem Arbeitsspeicher in einen
+      gemeinsamen Speicher verschieben.
 - [ ] **USt-IdNr.** nachtragen oder die Zeile im Impressum begründet entfernen.
 - [ ] **Versicherer und Geltungsbereich** der Betriebshaftpflicht ergänzen. Die
       Deckungssumme wird auf der Seite genannt; wer sie nennt, sollte sie
