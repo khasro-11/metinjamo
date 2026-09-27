@@ -17,6 +17,14 @@
 /.next/
 /out/
 
+# cloudflare — build output of `opennextjs-cloudflare build`, regenerated
+# on every deploy. `.dev.vars` holds the EmailJS credentials for
+# `opennextjs-cloudflare preview` and is a secrets file like .env.local.
+/.open-next/
+.dev.vars
+.dev.vars.*
+.wrangler/
+
 # production
 /build
 

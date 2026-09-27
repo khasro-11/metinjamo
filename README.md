@@ -216,27 +216,77 @@ gelebt werden.
 
 ## Deployment
 
-Hosting ist **noch nicht entschieden** (Claude.md 12). Die Anwendung ist eine
-normale Next.js-App ohne Datenbank und ohne Runtime-Abhängigkeiten; alle Seiten
-außer `/api/anfrage` werden statisch vorgerendert.
+Hosting ist **Cloudflare Workers**, deployt über den OpenNext-Adapter
+(`@opennextjs/cloudflare`). Die Konfiguration liegt in
+[`wrangler.jsonc`](./wrangler.jsonc) und [`open-next.config.ts`](./open-next.config.ts);
+beide Dateien sind kommentiert und erklären die jeweilige Entscheidung.
 
-**Vercel** ist der Weg des geringsten Widerstands: Repository verbinden, Framework
-wird erkannt, keine Build-Konfiguration nötig. Was in beiden Fällen zu tun ist:
+**Warum Workers und nicht Cloudflare Pages:** Pages liefert statische Dateien
+aus. `POST /api/anfrage` ist aber eine Serverroute — sie validiert den Body
+erneut, begrenzt die Rate und ruft EmailJS mit dem Private Key. Ein statischer
+Export (`output: 'export'`) kann diese Route nicht mitnehmen. Genau daran
+scheiterte der erste Deployversuch: die Build-Einstellung erwartete ein
+Verzeichnis `out/`, Next schreibt aber `.next/`, und `out/` entsteht nur beim
+statischen Export.
+
+### Einstellungen im Cloudflare-Dashboard
+
+Workers & Pages → Create → Workers → **Import a repository** → `metinjamo`.
+
+| Einstellung      | Wert                            |
+| ---------------- | ------------------------------- |
+| Build command    | `npx opennextjs-cloudflare build` |
+| Deploy command   | `npx opennextjs-cloudflare deploy` |
+| Build output dir | *leer lassen*                   |
+
+Das Ausgabeverzeichnis wird **nicht** gesetzt. Wohin deployt wird, steht in
+`wrangler.jsonc` (`main` und `assets.directory`) — ein Wert im Dashboard
+überschreibt das und bricht den Deploy.
+
+### Umgebungsvariablen
+
+Die vier `EMAILJS_*`-Werte gehören als **Secrets** an den Worker (Settings →
+Variables and Secrets), nicht als Plaintext-Variablen. Namen und Bedeutung:
+[`docs/emailjs.md`](./docs/emailjs.md). Der Adapter schreibt alle Worker-Variablen
+pro Request in `process.env`, deshalb liest `src/lib/emailjs.ts` sie unverändert
+weiter — im Code ist dafür nichts zu ändern.
+
+`EMAILJS_TEMPLATE_ID_CONFIRMATION` bleibt leer bzw. ungesetzt: gegen die
+Bestätigungsmail an den Absender wurde entschieden.
+
+### Checkliste beim ersten Deploy
 
 1. `company.site.url` in `src/config/company.ts` auf die echte Domain setzen.
    Sie speist `metadataBase`, Canonicals, OG-URLs, `sitemap.xml` und `robots.txt`
    — steht sie falsch, zeigen alle absoluten URLs auf die falsche Domain.
 2. Domain verbinden, HTTPS erzwingen, `www` und Apex auf eine Variante
    umleiten (die kanonische Variante muss zu `company.site.url` passen).
-3. Die fünf `EMAILJS_*`-Umgebungsvariablen setzen
-   ([`docs/emailjs.md`](./docs/emailjs.md)). Danach eine echte Testanfrage
-   absenden und prüfen, dass beide Mails ankommen.
-4. Nach dem ersten Deploy: `/sitemap.xml` und `/robots.txt` im Browser prüfen,
-   Sitemap in der Google Search Console einreichen.
+3. Die vier `EMAILJS_*`-Secrets setzen. Danach eine echte Testanfrage absenden
+   und prüfen, dass die Mail ankommt.
+4. `/sitemap.xml` und `/robots.txt` im Browser prüfen, Sitemap in der Google
+   Search Console einreichen.
 
-Bei einem klassischen Server (Hetzner, IONOS) läuft die App über
-`npm run build && npm run start` hinter einem Reverse Proxy — dann sind
-Node-Version, Prozessverwaltung und TLS selbst zu stellen.
+### Lokal
+
+`npm run preview` baut den Worker und startet ihn in der echten
+Workers-Laufzeit (workerd) — der einzige Weg, das Verhalten vor dem Deploy zu
+sehen; `npm run dev` läuft weiter unter Node.
+
+`npm run deploy` deployt von der eigenen Maschine aus. **Nur als Notfallweg
+benutzen:** der Build backt vorhandene `.env*`-Dateien in das Worker-Bundle
+(`.open-next/cloudflare/next-env.mjs`), der EmailJS Private Key aus
+`.env.local` landet damit im deployten Code statt als Cloudflare-Secret. Der
+Build im Dashboard hat dieses Problem nicht, weil `.env.local` nicht im
+Repository liegt.
+
+### Logs
+
+`observability` ist in `wrangler.jsonc` aktiviert, sonst wären die Zeilen aus
+`app/api/anfrage/route.ts` nur in einem Live-Tail zu sehen. `NOT DELIVERED` ist
+die einzige Spur, die eine fehlende Zugangsdatei oder eine abgelehnte Sendung
+hinterlässt — und `dropped as automated` die einzige, die ein falsch aussortierter
+echter Interessent hinterlässt. Personenbezogene Daten werden bewusst nicht
+geloggt; wer eine Logzeile ergänzt, prüft das vorher.
 
 Es gibt **kein Analytics und keine Third-Party-Skripte**, deshalb aktuell auch
 kein Consent-Banner. Das ist eine bewusste Entscheidung (Claude.md 3). Wer
@@ -268,10 +318,17 @@ Analytics ergänzt, prüft vorher, ob damit ein Banner nötig wird — cookieles
       anderem „unter zwei Minuten", die kostenlose Besichtigung, feste Teams
       und die Form der Leistungsnachweise.
 - [ ] **Domain festlegen** und `company.site.url` setzen.
-- [ ] **Hosting entscheiden**, dann die offenen Stellen in der
-      Datenschutzerklärung schließen (Hoster, Logfiles, Speicherfristen,
-      Stand-Datum) und das Rate-Limit aus dem Arbeitsspeicher in einen
-      gemeinsamen Speicher verschieben.
+- [x] ~~**Hosting entscheiden**~~ — Cloudflare Workers, siehe Abschnitt
+      Deployment.
+- [ ] **Cloudflare in der Datenschutzerklärung nachtragen** und AV-Vertrag
+      abschließen (Art. 28 DSGVO). Die Erklärung nennt bisher keinen Hoster;
+      damit fehlen Firmierung, Sitz, die Logfile-Angaben und das Stand-Datum.
+      Ohne diesen Punkt darf die Seite nicht live gehen.
+- [ ] **Rate-Limit in einen gemeinsamen Speicher verschieben.** Es liegt im
+      Arbeitsspeicher der Worker-Isolate und zählt damit pro Isolate, nicht pro
+      Besucher — bei Cloudflare sind das je nach Region mehrere. Der TODO steht
+      in `src/lib/anti-spam.ts`; die naheliegende Lösung ist jetzt ein
+      Durable Object oder Cloudflare KV.
 - [ ] **USt-IdNr.** nachtragen oder die Zeile im Impressum begründet entfernen.
 - [ ] **Versicherer und Geltungsbereich** der Betriebshaftpflicht ergänzen. Die
       Deckungssumme wird auf der Seite genannt; wer sie nennt, sollte sie

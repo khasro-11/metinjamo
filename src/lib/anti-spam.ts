@@ -136,16 +136,19 @@ export type RateLimitVerdict =
 /**
  * Counts this request against the caller's window.
  *
- * In-process and therefore per-instance: two serverless instances keep two
- * separate counters, and a redeploy resets both. That is a real limitation and
- * it is accepted on purpose — the store that would fix it depends on the
- * hosting decision, which is still open (CLAUDE.md 12). A limit that works
- * within one instance still stops the single-script flood this is aimed at,
- * and it needs no dependency and no third party.
+ * In-process and therefore per-instance: two Worker isolates keep two separate
+ * counters, and a redeploy resets both. That is a real limitation and it is
+ * accepted on purpose for now — a limit that works within one isolate still
+ * stops the single-script flood this is aimed at, and it needs no dependency
+ * and no third party.
  *
- * TODO (project): once hosting is fixed, move the counter into a shared store
- * (Cloudflare KV / Durable Object, or the platform's own rate limiter) so the
- * window holds across instances.
+ * Hosting is now decided (Cloudflare Workers), so the store that would fix
+ * this is available and the limitation is no longer waiting on anything.
+ *
+ * TODO (project): move the counter into a Durable Object, Cloudflare KV or the
+ * platform's own rate limiter, so the window holds across isolates. Note that
+ * Cloudflare spreads requests over isolates per region, which makes the real
+ * ceiling a multiple of MAX_PER_WINDOW rather than MAX_PER_WINDOW itself.
  */
 export async function checkRateLimit(
   request: Request,

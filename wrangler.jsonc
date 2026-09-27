@@ -1,0 +1,65 @@
+/**
+ * Cloudflare Workers deployment config.
+ *
+ * Why Workers and not Pages: `POST /api/anfrage` is a server route — it
+ * re-validates the body, rate-limits the caller and calls EmailJS with the
+ * private key. A static Pages deployment (`output: 'export'`) cannot carry it,
+ * which is exactly why the earlier `out`-directory build failed: Next writes
+ * `.next/`, and `out/` only exists for a static export this app cannot do.
+ *
+ * `.open-next/` is produced by `opennextjs-cloudflare build` and is gitignored;
+ * the build command in the Cloudflare dashboard regenerates it on every push.
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "metinjamo",
+  "main": ".open-next/worker.js",
+
+  /*
+   * Pinned, not "today". The date selects a snapshot of runtime behaviour, so
+   * moving it is a deliberate change that gets tested — not something that
+   * drifts under the deployment by itself.
+   */
+  "compatibility_date": "2026-09-01",
+
+  /*
+   * `nodejs_compat` gives the worker the Node APIs that Next's server code
+   * expects. `global_fetch_strictly_public` makes `fetch()` from the worker go
+   * out over the public internet instead of looping back into this worker —
+   * the documented default for this adapter, and the behaviour the EmailJS
+   * call in `src/lib/emailjs.ts` assumes.
+   */
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  /* The prerendered pages, `/_next/static` and everything from `public/`. */
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  /*
+   * Image optimisation for `next/image`. Without this binding the adapter
+   * serves the original file and logs a warning — the six <Image> instances
+   * would still render, just unoptimised and at full weight, which Lighthouse
+   * notices (Claude.md 9). Transformations are metered; the free allowance is
+   * far above what a landing page with a handful of images consumes.
+   */
+  "images": {
+    "binding": "IMAGES"
+  },
+
+  /*
+   * Workers Logs. `app/api/anfrage/route.ts` is written on the assumption that
+   * its log lines are readable after the fact — "NOT DELIVERED" is how a
+   * missing credential or a rejected send is noticed at all, and
+   * "dropped as automated" is the only trace a false positive leaves. Without
+   * this, those lines exist only in a live tail nobody is watching.
+   *
+   * No personal data is logged, by design: no name, address, phone number or
+   * message text reaches a log line. That is what makes retaining the logs
+   * unproblematic — check `route.ts` before adding one that does.
+   */
+  "observability": {
+    "enabled": true
+  }
+}

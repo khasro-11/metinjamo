@@ -1,5 +1,6 @@
 import path from 'node:path';
 
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
 import type { NextConfig } from 'next';
 
 /**
@@ -60,5 +61,21 @@ const nextConfig: NextConfig = {
     ];
   },
 };
+
+/**
+ * Gives `next dev` the same Cloudflare context the deployed worker has, read
+ * from `wrangler.jsonc` — bindings and `.dev.vars` included.
+ *
+ * Guarded by NODE_ENV on purpose. The function is not build-safe: it has no
+ * internal dev check, so called unconditionally it starts a Miniflare instance
+ * during `next build` as well — which is pure cost in CI at best, and a build
+ * that never exits at worst. `next dev` is the only place it does anything
+ * useful, and that is the only place NODE_ENV is `development`.
+ *
+ * Not awaited, as documented for this function.
+ */
+if (process.env.NODE_ENV === 'development') {
+  void initOpenNextCloudflareForDev();
+}
 
 export default nextConfig;
