@@ -11,9 +11,15 @@
    Die Seite darf nicht live gehen, solange auch nur eine davon übrig ist.
 
    Konkret noch zu klären (CLAUDE.md 6 und 12):
-     - Hosting-Anbieter + Auftragsverarbeitungsvertrag (Art. 28 DSGVO)
-     - Serverstandort
-     - Umfang und Löschfrist der Server-Logfiles — hängt am Hoster
+     - Cloudflare ist vollständig: Firmierung, Anschrift, Art der
+       Bereitstellung, Auftragsverarbeitung und Rechtsgrundlage der
+       US-Übermittlung stehen in Abschnitt 03 und 07, belegt gegen das Data
+       Processing Addendum. Hier ist nichts mehr offen — Begründung der
+       Formulierungen im Kommentar bei Abschnitt 03.
+     - Umfang und Löschfrist der Server-Logfiles — aus den tatsächlichen
+       Cloudflare-Einstellungen übernehmen, Abschnitt 04
+     - Welche technisch notwendigen Cookies Cloudflare tatsächlich setzt —
+       nach dem ersten produktiven Deploy im Browser prüfen, Abschnitt 09
      - Brevo: der Versandweg steht in Abschnitt 06 und 07. Offen sind die
        Vertragsentität, ihre Anschrift, der Verarbeitungsort und der AVV nach
        Art. 28 DSGVO. Diese Angaben werden NICHT geschätzt: Brevo tritt je
@@ -227,30 +233,93 @@ export default function DatenschutzPage() {
         <LegalSection {...sections.get('hosting')}>
           <LegalProse>
             <p>
-              Diese Website wird bei einem externen Dienstleister gehostet.
-              Beim Aufruf einer Seite verarbeitet dieser Anbieter in unserem
-              Auftrag die Daten, die Ihr Browser technisch übermittelt.
+              Diese Website wird von <strong>Cloudflare</strong> bereitgestellt.
+              Beim Aufruf einer Seite verarbeitet Cloudflare in unserem Auftrag
+              die Daten, die Ihr Browser technisch übermittelt — darunter Ihre
+              IP-Adresse, ohne die keine Verbindung zustande käme.
+            </p>
+            <p>
+              Cloudflare betreibt ein weltweit verteiltes Netz von
+              Rechenzentren. Die Seite läuft als Programm in diesem Netz
+              (Cloudflare Workers) und nicht auf einem einzelnen, festen
+              Server; Ihre Anfrage wird an dem Standort bearbeitet, der
+              verkehrstechnisch am nächsten liegt. Es gibt deshalb
+              <strong> keinen einzelnen Serverstandort</strong>, den wir hier
+              nennen könnten. Bei einem Aufruf aus Deutschland ist es
+              üblicherweise ein europäischer Standort — technisch zugesichert
+              ist das jedoch nicht.
+            </p>
+            <p>
+              Anbieter ist die <strong>Cloudflare, Inc.</strong> mit Sitz in den
+              USA. Ihre Daten können damit den Europäischen Wirtschaftsraum
+              verlassen. Grundlage dieser Übermittlung sind die
+              <strong> Standardvertragsklauseln der EU-Kommission</strong> nach
+              Art. 46 Abs. 2 lit. c DSGVO.
+            </p>
+            <p>
+              Der Vertrag über die Auftragsverarbeitung nach Art. 28 DSGVO
+              liegt vor: Cloudflare führt ihn als <em>Data Processing
+              Addendum</em> und macht ihn zum Bestandteil seiner
+              Vertragsbedingungen. Er gilt damit mit dem Vertragsschluss, und
+              die Standardvertragsklauseln sind darin enthalten.
             </p>
           </LegalProse>
 
-          {/* TODO (Kunde/Projekt, CLAUDE.md 6 und 12): Hosting ist noch nicht
-              entschieden — Vercel, Hetzner oder IONOS. Vor dem Livegang hier
-              eintragen: Firmierung und Anschrift des Anbieters, Serverstandort,
-              und der Hinweis auf den Auftragsverarbeitungsvertrag. Bei einem
-              Anbieter mit US-Bezug zusätzlich: Rechtsgrundlage der Übermittlung
-              (Angemessenheitsbeschluss / Standardvertragsklauseln). */}
+          {/* Belegt am 28.09.2026 gegen das Data Processing Addendum von
+              Cloudflare (cloudflare.com/cloudflare-customer-dpa/):
+
+              - Annex 1 benennt als Datenimporteur "Cloudflare, Inc.,
+                101 Townsend Street, San Francisco, CA 94107, USA". Eine
+                abweichende EU-Gesellschaft für Kunden aus dem EWR sieht der
+                DPA nicht vor — deshalb steht hier nur diese eine Firmierung.
+              - Der DPA ist Bestandteil der Self-Serve Subscription Agreement
+                und der Enterprise Terms. Er gilt also mit dem Vertragsschluss;
+                ein gesondert unterzeichneter AVV ist nicht erforderlich. Damit
+                ist Art. 28 DSGVO erfüllt und an dieser Stelle nichts offen.
+              - Für Kunden, die Verantwortliche sind, bindet der DPA Modul Zwei
+                der EU-Standardvertragsklauseln ein (Controller-to-Processor).
+
+              Warum als Rechtsgrundlage die Standardvertragsklauseln stehen und
+              NICHT der Angemessenheitsbeschluss: Cloudflare ist zusätzlich nach
+              dem EU-US Data Privacy Framework zertifiziert (Teilnehmer 5666).
+              Eine Zertifizierung kann aber auslaufen oder zurückgezogen werden,
+              und dann wäre die Angabe hier falsch, ohne dass es jemand merkt —
+              die Rezertifizierung war zuletzt zum 23.09.2026 fällig. Die
+              SCC-Angabe ist unabhängig davon dauerhaft wahr, weil sie
+              vertraglich gilt. Wer den Angemessenheitsbeschluss nach Art. 45
+              DSGVO zusätzlich nennen will, muss vorher den Live-Status prüfen
+              (dataprivacyframework.gov, Teilnehmer 5666) und die Angabe danach
+              gepflegt halten. Nötig ist das nicht: die SCC tragen die
+              Übermittlung allein.
+
+              Unterauftragsverarbeiter von Cloudflare sind unter
+              cloudflare.com/gdpr/subprocessors/ veröffentlicht. Bei der
+              anwaltlichen Prüfung gegenlesen, ob sie in Abschnitt 07
+              aufzuführen sind. */}
           <div className="mt-6">
             <DataCard>
               <DataRow term="Hosting-Anbieter">
-                <Pending>Anbieter und Anschrift — noch offen</Pending>
+                Cloudflare, Inc., 101 Townsend Street, San Francisco,
+                CA 94107, USA
+              </DataRow>
+
+              <DataRow term="Art der Bereitstellung">
+                Cloudflare Workers — Ausführung im weltweiten Cloudflare-Netz
               </DataRow>
 
               <DataRow term="Serverstandort">
-                <Pending>Standort — noch offen</Pending>
+                Kein fester Standort; Auslieferung aus dem verkehrstechnisch
+                nächstgelegenen Rechenzentrum
               </DataRow>
 
               <DataRow term="Auftragsverarbeitung">
-                <Pending>AV-Vertrag nach Art. 28 DSGVO — noch offen</Pending>
+                Data Processing Addendum von Cloudflare, Bestandteil der
+                Vertragsbedingungen (Art. 28 DSGVO)
+              </DataRow>
+
+              <DataRow term="Drittlandübermittlung">
+                USA — auf Grundlage der EU-Standardvertragsklauseln nach
+                Art. 46 Abs. 2 lit. c DSGVO
               </DataRow>
             </DataCard>
           </div>
@@ -259,8 +328,7 @@ export default function DatenschutzPage() {
             <p>
               Rechtsgrundlage ist unser berechtigtes Interesse an einer sicher
               und zuverlässig bereitgestellten Website nach Art. 6 Abs. 1
-              lit. f DSGVO. Mit dem Anbieter schließen wir einen Vertrag über
-              die Auftragsverarbeitung nach Art. 28 DSGVO.
+              lit. f DSGVO.
             </p>
           </LegalProse>
         </LegalSection>
@@ -269,18 +337,36 @@ export default function DatenschutzPage() {
         <LegalSection {...sections.get('logfiles')}>
           <LegalProse>
             <p>
-              Bei jedem Aufruf dieser Website erhebt der Server automatisch
-              Daten, die Ihr Browser übermittelt. Diese Daten werden nicht mit
-              anderen Datenquellen zusammengeführt und dienen nicht dazu, Sie
-              persönlich zu identifizieren.
+              Bei jedem Aufruf dieser Website werden automatisch Daten
+              erhoben, die Ihr Browser übermittelt. Diese Daten werden nicht
+              mit anderen Datenquellen zusammengeführt und dienen nicht dazu,
+              Sie persönlich zu identifizieren.
+            </p>
+            <p>
+              Die Protokollierung findet bei Cloudflare statt, weil dort die
+              Verbindung Ihres Browsers endet (Abschnitt 03). Für unsere
+              Serverroute — die Route, die eine Formularanfrage annimmt — haben
+              wir zusätzlich die Protokollfunktion von Cloudflare aktiviert, um
+              einen technischen Fehler beim Versand überhaupt bemerken zu
+              können. In diese Protokolle schreiben wir bewusst <strong>keine
+              Inhalte aus dem Formular</strong>: keinen Namen, keine Anschrift,
+              keine Telefonnummer und keinen Nachrichtentext.
             </p>
           </LegalProse>
 
-          {/* TODO (Projekt): Der tatsächliche Umfang der Logfiles hängt vom
-              Hoster ab und ist erst nach dessen Auswahl belegbar. Die Liste
-              unten ist der branchenübliche Umfang und muss gegen die
-              tatsächliche Konfiguration geprüft werden — nicht ungeprüft
-              übernehmen. Ebenso die Löschfrist. */}
+          {/* Der Satz zur eigenen Protokollierung ist eine Tatsachenbehauptung
+              über zwei Dateien: "observability" in wrangler.jsonc schaltet die
+              Workers Logs ein, und app/api/anfrage/route.ts entscheidet, was
+              dort hineingeschrieben wird. Beide sind so gebaut, dass keine
+              personenbezogene Angabe in einer Logzeile landet — auch Adressen
+              in Fehlermeldungen des Mailanbieters werden vorher ersetzt. Wird
+              dort eine Logzeile ergänzt, ist dieser Absatz mitzuprüfen.
+
+              TODO (Projekt): Die Liste unten ist der branchenübliche Umfang und
+              muss gegen die tatsächliche Cloudflare-Konfiguration geprüft
+              werden — nicht ungeprüft übernehmen. Ebenso die Löschfrist: sie
+              hängt am Tarif und an den Einstellungen des Kontos, nicht am
+              Code. */}
           <div className="mt-5">
             <LegalList
               items={[
@@ -304,12 +390,18 @@ export default function DatenschutzPage() {
 
           <div className="mt-6">
             <DataCard>
+              <DataRow term="Ort der Protokollierung">
+                Cloudflare-Netz, kein fester Standort (Abschnitt 03)
+              </DataRow>
+
               <DataRow term="Umfang der Protokollierung">
-                <Pending>Gegen Hoster-Konfiguration prüfen</Pending>
+                <Pending>Gegen die Cloudflare-Konfiguration prüfen</Pending>
               </DataRow>
 
               <DataRow term="Speicherdauer der Logfiles">
-                <Pending>Frist in Tagen — noch offen</Pending>
+                <Pending>
+                  Frist in Tagen — aus den Cloudflare-Einstellungen übernehmen
+                </Pending>
               </DataRow>
             </DataCard>
           </div>
@@ -515,12 +607,14 @@ export default function DatenschutzPage() {
 
           {/* TODO (Projekt): Eine allgemeine Beschreibung reicht für die
               Informationspflicht nach Art. 13 Abs. 1 lit. e DSGVO nicht aus.
-              Die Liste ist erst abschließend, wenn beide Zeilen unten eine
-              Firmierung tragen. */}
+              Die Hosting-Zeile trägt jetzt eine Firmierung; abschließend ist
+              die Liste erst, wenn auch die Zeile zum Mailversand eine trägt —
+              siehe Abschnitt 06. */}
           <div className="mt-6">
             <DataCard>
               <DataRow term="Hosting">
-                <Pending>Anbieter — noch offen</Pending>
+                Cloudflare, Inc., San Francisco, USA — Bereitstellung der
+                Website, Verarbeitung im weltweiten Netz (Abschnitt 03)
               </DataRow>
 
               <DataRow term="Zustellung der Formularanfragen">
@@ -575,6 +669,13 @@ export default function DatenschutzPage() {
               Werbe-Pixel und keine Reichweitenmessung.
             </p>
             <p>
+              Technisch notwendige Cookies kann unser Hosting-Anbieter setzen,
+              um automatisierte Zugriffe von echten Besuchern zu unterscheiden
+              und die Website vor Überlastung zu schützen (Abschnitt 03). Sie
+              dienen keiner Analyse und keiner Werbung, und sie sind nach
+              § 25 Abs. 2 TDDDG nicht einwilligungspflichtig.
+            </p>
+            <p>
               Beim ersten Besuch fragen wir Sie über einen Hinweis am unteren
               Bildschirmrand, ob externe Inhalte geladen werden dürfen. Das
               betrifft Dienste, die von fremden Servern ausgeliefert werden —
@@ -622,7 +723,14 @@ export default function DatenschutzPage() {
               Analytics, eine Karte, ein Captcha oder ein WhatsApp-Link dazu
               kommt (CLAUDE.md 12), braucht der Dienst hier einen eigenen
               Abschnitt mit Zweck, Anbieter, Rechtsgrundlage und Speicherdauer
-              — und ggf. ein Consent-Banner. */}
+              — und ggf. ein Consent-Banner.
+
+              TODO (Projekt): Nach dem ersten produktiven Deploy im Browser
+              nachsehen, welche Cookies Cloudflare tatsächlich setzt — bei
+              aktiver Bot-Abwehr typischerweise __cf_bm — und sie im Absatz
+              oben namentlich nennen, mit Zweck und Laufzeit. Setzt Cloudflare
+              keines, gehört der Absatz gestrichen: eine Angabe über Cookies,
+              die es nicht gibt, ist genauso falsch wie eine fehlende. */}
         </LegalSection>
 
         {/* ---------------------------------------------------------------- */}
