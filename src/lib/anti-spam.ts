@@ -10,10 +10,10 @@
  * and therefore need a consent banner and its own DSGVO assessment. These
  * three checks track nobody, load nothing and cost the visitor nothing.
  *
- * Why it matters more now than before: delivery runs through EmailJS, whose
- * plans are metered. An unprotected form does not just produce junk mail — a
- * single bot burns the monthly quota, and every real request after that is
- * rejected by the provider. Spam protection here is availability protection.
+ * Why it matters more now than before: delivery runs through Brevo, whose plans
+ * are metered. An unprotected form does not just produce junk mail — a single
+ * bot burns the daily quota, and every real request after that is rejected by
+ * the provider. Spam protection here is availability protection.
  */
 
 import { z } from 'zod';

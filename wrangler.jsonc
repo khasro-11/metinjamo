@@ -2,8 +2,8 @@
  * Cloudflare Workers deployment config.
  *
  * Why Workers and not Pages: `POST /api/anfrage` is a server route — it
- * re-validates the body, rate-limits the caller and calls EmailJS with the
- * private key. A static Pages deployment (`output: 'export'`) cannot carry it,
+ * re-validates the body, rate-limits the caller and calls Brevo with the API
+ * key. A static Pages deployment (`output: 'export'`) cannot carry it,
  * which is exactly why the earlier `out`-directory build failed: Next writes
  * `.next/`, and `out/` only exists for a static export this app cannot do.
  *
@@ -26,10 +26,41 @@
    * `nodejs_compat` gives the worker the Node APIs that Next's server code
    * expects. `global_fetch_strictly_public` makes `fetch()` from the worker go
    * out over the public internet instead of looping back into this worker —
-   * the documented default for this adapter, and the behaviour the EmailJS
-   * call in `src/lib/emailjs.ts` assumes.
+   * the documented default for this adapter, and the behaviour the Brevo call
+   * in `src/lib/brevo.ts` assumes.
    */
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  /*
+   * No preview URLs. They would make every deployed version publicly reachable
+   * under its own `*.workers.dev` address — a second front door to a GmbH
+   * website that serves the imprint and a working contact form, on a hostname
+   * that is not the one in `company.site.url`. Nothing about this project needs
+   * that, and versions stay inspectable in the dashboard without it.
+   */
+  "preview_urls": false,
+
+  /*
+   * Plaintext environment variables. Public values only.
+   *
+   * `BREVO_SENDER_EMAIL` is the verified Brevo sender the form sends from. It is
+   * the same address the imprint prints, so it is not a secret — but it IS a
+   * second place where that address is written down, which Claude.md 2 otherwise
+   * forbids. The exception is unavoidable: this file is deployment config and
+   * cannot import `company.ts`. Consequence to keep in mind — if the address in
+   * `company.ts` ever changes, it has to change here too, and the new address
+   * has to be verified in Brevo before the next deploy.
+   *
+   * The API key does NOT belong here, and that has teeth beyond the obvious:
+   * `wrangler deploy` overwrites dashboard-set *plaintext* variables with
+   * whatever this block says, while Secrets are preserved untouched. A key
+   * stored as a plaintext variable would therefore be silently wiped on the
+   * next deploy and the form would answer 503 until somebody noticed. As a
+   * Secret (Settings -> Variables and Secrets) it survives every deploy.
+   */
+  "vars": {
+    "BREVO_SENDER_EMAIL": "info@imperial-gmbh.com"
+  },
 
   /* The prerendered pages, `/_next/static` and everything from `public/`. */
   "assets": {

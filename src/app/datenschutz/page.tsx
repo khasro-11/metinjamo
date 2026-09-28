@@ -14,12 +14,13 @@
      - Hosting-Anbieter + Auftragsverarbeitungsvertrag (Art. 28 DSGVO)
      - Serverstandort
      - Umfang und Löschfrist der Server-Logfiles — hängt am Hoster
-     - EmailJS: Versandweg, Firmierung (EmailJS Pte. Ltd., Singapur) und
-       Verarbeitungsort (USA, AWS) stehen in Abschnitt 06 und 07. Offen ist
-       nur noch der AVV nach Art. 28 DSGVO und die Anschrift des Anbieters,
-       die keiner der veröffentlichten Texte nennt. Beim Vertragsabschluss
-       sind die eingetragenen Angaben gegen den unterzeichneten Vertrag zu
-       prüfen. Schritt für Schritt in docs/emailjs.md, Abschnitt 7.
+     - Brevo: der Versandweg steht in Abschnitt 06 und 07. Offen sind die
+       Vertragsentität, ihre Anschrift, der Verarbeitungsort und der AVV nach
+       Art. 28 DSGVO. Diese Angaben werden NICHT geschätzt: Brevo tritt je
+       nach Vertrag über eine deutsche oder eine französische Gesellschaft
+       auf, und eine falsche Firmierung an dieser Stelle ist selbst ein
+       Verstoß. Sie sind dem unterzeichneten Vertrag zu entnehmen. Schritt
+       für Schritt in docs/brevo.md, Abschnitt 5.
      - Aufbewahrungsfristen: Anfragen ohne Auftrag vs. Handels- und
        steuerrechtliche Pflichten (§ 257 HGB, § 147 AO)
      - Stand-Datum dieser Erklärung, sobald der Text final ist
@@ -389,7 +390,7 @@ export default function DatenschutzPage() {
               </p>
               <p>
                 Damit die Anfrage unser Postfach erreicht, setzen wir den
-                Dienst <strong>EmailJS</strong> als Auftragsverarbeiter ein.
+                Dienst <strong>Brevo</strong> als Auftragsverarbeiter ein.
                 Der Dienst wird ausschließlich von unserem Server aus
                 angesprochen: <strong>Ihr Gerät baut zu ihm keine Verbindung
                 auf</strong>, Ihre IP-Adresse wird ihm nicht übermittelt, und
@@ -399,14 +400,10 @@ export default function DatenschutzPage() {
                 versenden wir nicht.
               </p>
               <p>
-                Anbieter des Dienstes ist die
-                <strong> EmailJS Pte. Ltd.</strong> mit Sitz in Singapur. Die
-                Verarbeitung findet nach Angaben des Anbieters auf Servern in
-                den <strong>USA</strong> statt, die von Amazon Web Services
-                betrieben werden. Ihre Angaben verlassen damit den
-                Europäischen Wirtschaftsraum. Grundlage der Übermittlung sind
-                die Standardvertragsklauseln der EU-Kommission nach
-                Art. 46 Abs. 2 lit. c DSGVO.
+                Firmierung, Sitz und Verarbeitungsort des Anbieters tragen wir
+                hier ein, sobald der Auftragsverarbeitungsvertrag geschlossen
+                ist — siehe die Übersicht im Anschluss. Bis dahin steht an
+                diesen Stellen bewusst ein Hinweis und keine Vermutung.
               </p>
               <p>
                 Gegen automatisierte Massenzuschriften prüfen wir beim
@@ -422,26 +419,30 @@ export default function DatenschutzPage() {
               </p>
             </LegalProse>
 
-            {/* Firmierung, Sitz und Verarbeitungsort stammen aus den am
-                27.09.2026 veröffentlichten Rechtstexten des Anbieters:
-                Auftragsverarbeitungsvertrag (Entität, Standardvertragsklauseln,
-                Übermittlung in die USA) und Datenschutzerklärung (Server in
-                den USA, betrieben von AWS).
+            {/* TODO (Kunde): AVV mit Brevo abschließen (Art. 28 DSGVO) und
+                danach die vier <Pending>-Zeilen unten aus dem unterzeichneten
+                Vertrag füllen.
 
-                TODO (Kunde): AVV abschließen. Beim Abschluss die Angaben oben
-                gegen den tatsächlich unterzeichneten Vertrag prüfen und die
-                Anschrift des Anbieters nachtragen — die veröffentlichen beide
-                Texte nicht. Eine falsche Angabe an dieser Stelle ist selbst
-                ein Verstoß. Anleitung: docs/emailjs.md, Abschnitt 7. */}
+                Hier stehen absichtlich KEINE Vorschlagswerte. Brevo tritt je
+                nach Vertrag über eine deutsche oder eine französische
+                Gesellschaft auf; welche unser Vertragspartner ist, ergibt sich
+                erst aus dem Vertrag. Der Anbieter gibt die EU als
+                Verarbeitungsort an — bestätigt der Vertrag das, entfällt die
+                Zeile zur Drittlandübermittlung ersatzlos, und dann ist auch
+                Abschnitt 07 entsprechend zu kürzen. Steht dort etwas anderes,
+                braucht es eine Grundlage nach Art. 44 ff. DSGVO.
+
+                Eine falsche Angabe an dieser Stelle ist selbst ein Verstoß.
+                Anleitung: docs/brevo.md, Abschnitt 5. */}
             <div className="mt-6">
               <DataCard>
                 <DataRow term="Zustellung der Anfrage">
-                  EmailJS — aufgerufen von unserem Server, nicht von Ihrem
+                  Brevo — aufgerufen von unserem Server, nicht von Ihrem
                   Gerät
                 </DataRow>
 
                 <DataRow term="Firmierung und Sitz">
-                  EmailJS Pte. Ltd., Singapur
+                  <Pending>Vertragsentität aus dem AV-Vertrag</Pending>
                 </DataRow>
 
                 <DataRow term="Anschrift des Anbieters">
@@ -453,11 +454,7 @@ export default function DatenschutzPage() {
                 </DataRow>
 
                 <DataRow term="Ort der Verarbeitung">
-                  USA (Amazon Web Services)
-                </DataRow>
-
-                <DataRow term="Drittlandübermittlung">
-                  Auf Grundlage der EU-Standardvertragsklauseln
+                  <Pending>Aus dem AV-Vertrag zu übernehmen</Pending>
                 </DataRow>
               </DataCard>
             </div>
@@ -505,7 +502,7 @@ export default function DatenschutzPage() {
             <p>
               Darüber hinaus geben wir Daten an Dienstleister weiter, die für
               uns als Auftragsverarbeiter nach Art. 28 DSGVO tätig sind — das
-              sind der Hosting-Anbieter und EmailJS, der Dienst, über den die
+              sind der Hosting-Anbieter und Brevo, der Dienst, über den die
               Formularanfragen zugestellt werden (Abschnitt 06). Beide sind
               vertraglich an unsere Weisungen gebunden.
             </p>
@@ -527,7 +524,8 @@ export default function DatenschutzPage() {
               </DataRow>
 
               <DataRow term="Zustellung der Formularanfragen">
-                EmailJS Pte. Ltd., Singapur — Verarbeitung in den USA
+                <Pending>Brevo — Vertragsentität und Verarbeitungsort aus dem
+                AV-Vertrag</Pending>
               </DataRow>
             </DataCard>
           </div>

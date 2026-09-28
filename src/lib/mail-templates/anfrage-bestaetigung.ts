@@ -1,31 +1,24 @@
-<!DOCTYPE html>
-<!--
-  EmailJS-Vorlage 2 von 2 — BESTAETIGUNG AN DEN KUNDEN (empfohlen)
-  Env-Var: EMAILJS_TEMPLATE_ID_CONFIRMATION
-  Empfänger: {{to_email}} — die einzige Vorlage mit dynamischem Empfänger.
-              Im Dashboard MUSS das To-Feld {{to_email}} sein.
+/**
+ * HTML body of the confirmation mail — the copy the enquirer receives.
+ *
+ * Off by default. `BREVO_SEND_CONFIRMATION` gates it, and it ships unset
+ * because the client decided against an auto-reply. The markup is kept ready
+ * rather than deleted so that turning it on is one environment variable and not
+ * a rebuild of a mail template.
+ *
+ * Because this mail leaves the company, it is a Geschäftsbrief: § 35a GmbHG
+ * requires it to carry the firm, its seat, the register court, the register
+ * number and every managing director. Those arrive as parameters from
+ * `company.ts` — see `renderQuoteMail` — so that they are written down in
+ * exactly one place (Claude.md 2).
+ *
+ * Placeholders are `{{snake_case}}`, filled by `renderMailTemplate` from
+ * `ConfirmationParams`, HTML-escaped on the way in. See the sibling
+ * `anfrage-intern.ts` for why the markup lives in the repo and not in the
+ * provider's dashboard.
+ */
 
-  Gebaut für ConfirmationParams aus src/lib/quote-mail.ts:
-
-    to_email · subject · customer_name · submitted_at · services_block
-    frequency · property_type · postal_code · company_name · company_phone
-    company_email · office_hours · privacy_url
-    company_address · company_registry · company_director
-
-  Keine Firmenangabe ist hier hartkodiert. Jede kommt als Platzhalter aus
-  company.ts (CLAUDE.md 2) — eine Adresse, die in dieser Datei steht, würde
-  beim nächsten Umzug übersehen.
-
-  Die letzten drei Variablen sind Pflicht, nicht Kosmetik: eine
-  Geschäftsmail einer GmbH ist ein Geschäftsbrief und braucht nach
-  § 35a GmbHG Firma, Sitz, Registergericht, Handelsregisternummer und alle
-  Geschäftsführer. Fehlen sie, ist die Mail formal angreifbar.
-
-  Sectionrhythmus nach CLAUDE.md 5.9, auf die Mail übertragen:
-    Kopf blue-900 → Text paper → Zusammenfassung sand-100 → Kontakt
-    blue-900 → Datenschutz paper → Fuß ink.
-  Nie mehr als zwei helle Flächen hintereinander.
--->
+export const CONFIRMATION_HTML = `<!DOCTYPE html>
 <html lang="de" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="utf-8">
@@ -244,3 +237,4 @@
 
 </body>
 </html>
+`;

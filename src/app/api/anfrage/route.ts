@@ -6,9 +6,10 @@
  * treated as worth nothing here: this endpoint is public, so the body is parsed
  * against the same schema again before anything is done with it.
  *
- * Delivery runs through EmailJS, called server-side — see `src/lib/emailjs.ts`
- * for why it is the REST API and not the browser SDK, and `docs/emailjs.md` for
- * the dashboard setup the credentials refer to.
+ * Delivery runs through the Brevo transactional email API, called server-side —
+ * see `src/lib/brevo.ts` for why the visitor's browser never talks to Brevo and
+ * why there is no SDK, and `docs/brevo.md` for the account setup the credentials
+ * refer to.
  *
  * What this handler does NOT do, on purpose: no database write, no analytics
  * event, no third-party pixel, and no logging of names, addresses, phone
@@ -26,7 +27,8 @@ import {
   MailConfigError,
   MailDeliveryError,
   sendQuoteRequest,
-} from '@/lib/emailjs';
+} from '@/lib/brevo';
+import { MailTemplateError } from '@/lib/mail-template';
 import { quoteRequestSchema } from '@/lib/quote-request';
 
 /**
@@ -133,15 +135,23 @@ export async function POST(request: Request): Promise<Response> {
   /* --- delivery --------------------------------------------------------- */
 
   try {
-    const { confirmationSent } = await sendQuoteRequest(quoteRequest);
+    const { messageId, confirmationSent } =
+      await sendQuoteRequest(quoteRequest);
 
-    // Non-identifying, so it stays useful for "does the form work at all"
-    // without putting personal data into a platform log.
+    /*
+     * Non-identifying, so it stays useful for "does the form work at all"
+     * without putting personal data into a platform log. The message id is
+     * Brevo's own handle for this send: it is what turns "the form worked" into
+     * "and here is the delivery record for that exact mail", which is the
+     * difference between guessing and knowing when somebody reports that their
+     * enquiry was never answered.
+     */
     console.info(
       `[anfrage] delivered: ${quoteRequest.serviceCategories.length} ` +
         `category/-ies, ${quoteRequest.services.length} service(s), ` +
         `frequency=${quoteRequest.frequency}, type=${quoteRequest.propertyType}, ` +
-        `confirmation=${confirmationSent ? 'sent' : 'skipped'}`,
+        `confirmation=${confirmationSent ? 'sent' : 'skipped'}` +
+        (messageId === null ? '' : `, messageId=${messageId}`),
     );
 
     return json({ ok: true }, 200);
@@ -161,6 +171,18 @@ export async function POST(request: Request): Promise<Response> {
         `[anfrage] NOT DELIVERED — ${cause.message}` +
           (cause.status === null ? '' : ` (status ${cause.status})`),
       );
+      return json({ ok: false, error: 'mail_failed' }, 502);
+    }
+
+    if (cause instanceof MailTemplateError) {
+      /*
+       * A parameter was renamed in `quote-mail.ts` without being renamed in the
+       * matching file under `src/lib/mail-templates/`, or the other way round.
+       * A code fault that no environment variable can fix, and the message is
+       * logged in full because it names the placeholder and contains nothing
+       * the visitor typed.
+       */
+      console.error(`[anfrage] NOT DELIVERED — ${cause.message}`);
       return json({ ok: false, error: 'mail_failed' }, 502);
     }
 

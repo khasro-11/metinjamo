@@ -47,9 +47,10 @@ npm run dev          # http://localhost:3000
 Vor jedem Commit sollten `lint`, `typecheck` und `build` grün sein. Es gibt noch
 keine automatisierte Test-Suite — der Build ist aktuell das einzige Netz.
 
-Environment-Variablen: Der Mailversand des Formulars braucht fünf davon. Die
-Vorlage steht in [`.env.example`](./.env.example), die Einrichtung in
-[`docs/emailjs.md`](./docs/emailjs.md). Ohne sie läuft die Seite normal, nur das
+Environment-Variablen: Der Mailversand des Formulars braucht zwei Pflichtwerte
+(`BREVO_API_KEY`, `BREVO_SENDER_EMAIL`) und kennt drei optionale. Die Vorlage
+steht in [`.env.example`](./.env.example), die Einrichtung in
+[`docs/brevo.md`](./docs/brevo.md). Ohne sie läuft die Seite normal, nur das
 Formular antwortet mit einer Fehlermeldung statt mit einer Erfolgsmeldung —
 siehe [Formular](#formular--api).
 
@@ -86,9 +87,10 @@ src/
   config/              company.ts, navigation.ts
   content/             services.ts, faq.ts
   lib/                 cn.ts, motion.ts, quote-request.ts
-                       emailjs.ts, quote-mail.ts, anti-spam.ts  (Mailversand)
+                       brevo.ts, quote-mail.ts, anti-spam.ts    (Mailversand)
+                       mail-template.ts, mail-templates/        (HTML der Mails)
 docs/
-  emailjs.md           Einrichtung des Mailversands — Dashboard-Schritte
+  brevo.md             Einrichtung des Mailversands — Account-Schritte
 ```
 
 ### Zwei Regeln, die beim Weiterbauen wichtig sind
@@ -166,34 +168,43 @@ Der Ablauf: `QuoteForm` (Client) validiert gegen `src/lib/quote-request.ts` und
 schickt an `POST /api/anfrage`. Der Endpunkt validiert **dieselbe** Schema-Datei
 noch einmal, weil er öffentlich ist.
 
-Zugestellt wird über **EmailJS**, und zwar **serverseitig** über deren
-REST-API (`src/lib/emailjs.ts`) — nicht über das Browser-SDK. Der Grund steht
-ausführlich im Kopf der Datei: beim Versand aus dem Browser würde das Gerät des
-Besuchers eine Verbindung zu `api.emailjs.com` aufbauen und dabei seine
-IP-Adresse in ein Drittland übertragen, bevor er irgendetwas bestätigt hat. Das
-wäre einwilligungspflichtig und würde ein Cookie-Banner erzwingen. So spricht
-nur unser Server mit dem Dienst.
+Zugestellt wird über die **Brevo Transaktions-API (v3)**, und zwar
+**serverseitig** per `fetch` (`src/lib/brevo.ts`) — nicht aus dem Browser. Der
+Grund steht ausführlich im Kopf der Datei: beim Versand aus dem Browser würde das
+Gerät des Besuchers eine Verbindung zu `api.brevo.com` aufbauen und dabei seine
+IP-Adresse an einen Dritten übertragen, bevor er irgendetwas bestätigt hat. Das
+wäre einwilligungspflichtig und würde ein Consent-Banner erzwingen. So spricht
+nur unser Server mit dem Dienst. Kein SDK: `@getbrevo/brevo` ist ein generierter
+axios-Client und würde einen Dependency-Baum in ein Worker-Bundle ziehen, um
+genau einen HTTP-Aufruf zu kapseln (Claude.md 10.7).
 
-Pro Anfrage gehen zwei Mails raus:
+Pro Anfrage geht **eine** Mail raus. Die zweite ist gebaut, aber abgeschaltet:
 
 | Mail | Verhalten bei Fehlschlag |
 | --- | --- |
 | interne Benachrichtigung an `info@imperial-gmbh.com`, `Reply-To` auf den Absender | `502`, das Formular zeigt die Fehlermeldung mit der Telefonnummer |
-| Bestätigung an den Absender | wird nur geloggt; die Anfrage gilt als zugestellt |
+| Bestätigung an den Absender — **aus**, nur mit `BREVO_SEND_CONFIRMATION=1` | wird nur geloggt; die Anfrage gilt als zugestellt |
 
 Die Unterscheidung ist Absicht: die interne Mail **ist** die Anfrage. Die
 Bestätigung ist Höflichkeit — sie zum Fehler zu machen würde den Kunden
 auffordern, noch einmal abzusenden, und eine doppelte Anfrage erzeugen.
 
-Der Inhalt beider Mails wird in `src/lib/quote-mail.ts` gebaut, nicht im
-EmailJS-Dashboard. Die Vorlagen dort enthalten nur Platzhalter — jede
-Firmenangabe kommt aus `company.ts`, sonst wäre die Vorlage eine zweite Kopie
-davon, die niemand mitpflegt.
+Der Absender ist immer unsere verifizierte Adresse, nie die des Anfragenden:
+dessen Adresse steht im `Reply-To`, damit „Antworten" bei ihm landet. Umgekehrt
+wäre es eine von unserer Domain signierte Mail, die vorgibt von seiner zu
+kommen — genau das weisen SPF und DMARC zurück.
 
-> **Ohne die fünf Umgebungsvariablen antwortet der Endpunkt mit
+Inhalt und HTML beider Mails liegen **im Repository**, nicht beim Anbieter:
+`src/lib/quote-mail.ts` baut die Werte, `src/lib/mail-templates/*.ts` das Markup,
+`src/lib/mail-template.ts` setzt ein und escaped. Eine Vorlage im Dashboard eines
+Anbieters kann nichts importieren — jede Firmenangabe darin wäre eine zweite
+Kopie von `company.ts`, die niemand mitpflegt. Ein Platzhalter ohne Gegenstück
+lässt den Versand fehlschlagen statt eine leere Zeile zu verschicken.
+
+> **Ohne `BREVO_API_KEY` und `BREVO_SENDER_EMAIL` antwortet der Endpunkt mit
 > `503 mail_not_configured`** und das Formular zeigt seine Fehlermeldung. Es
 > behauptet nie, eine Anfrage sei angekommen, wenn sie es nicht ist.
-> Einrichtung: [`docs/emailjs.md`](./docs/emailjs.md).
+> Einrichtung: [`docs/brevo.md`](./docs/brevo.md).
 
 **Spamschutz** (`src/lib/anti-spam.ts`): ein Honeypot-Feld, eine Zeitprüfung
 (unter 3 s = verworfen) und ein Rate-Limit von 5 Anfragen pro 10 Minuten pro
@@ -223,7 +234,7 @@ beide Dateien sind kommentiert und erklären die jeweilige Entscheidung.
 
 **Warum Workers und nicht Cloudflare Pages:** Pages liefert statische Dateien
 aus. `POST /api/anfrage` ist aber eine Serverroute — sie validiert den Body
-erneut, begrenzt die Rate und ruft EmailJS mit dem Private Key. Ein statischer
+erneut, begrenzt die Rate und ruft Brevo mit dem API-Key. Ein statischer
 Export (`output: 'export'`) kann diese Route nicht mitnehmen. Genau daran
 scheiterte der erste Deployversuch: die Build-Einstellung erwartete ein
 Verzeichnis `out/`, Next schreibt aber `.next/`, und `out/` entsteht nur beim
@@ -245,14 +256,16 @@ Das Ausgabeverzeichnis wird **nicht** gesetzt. Wohin deployt wird, steht in
 
 ### Umgebungsvariablen
 
-Die vier `EMAILJS_*`-Werte gehören als **Secrets** an den Worker (Settings →
-Variables and Secrets), nicht als Plaintext-Variablen. Namen und Bedeutung:
-[`docs/emailjs.md`](./docs/emailjs.md). Der Adapter schreibt alle Worker-Variablen
-pro Request in `process.env`, deshalb liest `src/lib/emailjs.ts` sie unverändert
+`BREVO_API_KEY` gehört als **Secret** an den Worker (Settings → Variables and
+Secrets), nicht als Plaintext-Variable. Namen und Bedeutung:
+[`docs/brevo.md`](./docs/brevo.md). Der Adapter schreibt alle Worker-Variablen
+pro Request in `process.env`, deshalb liest `src/lib/brevo.ts` sie unverändert
 weiter — im Code ist dafür nichts zu ändern.
 
-`EMAILJS_TEMPLATE_ID_CONFIRMATION` bleibt leer bzw. ungesetzt: gegen die
-Bestätigungsmail an den Absender wurde entschieden.
+`BREVO_TO_EMAIL` bleibt leer: der Empfänger ist `info@imperial-gmbh.com` aus
+`company.ts`, und das soll die einzige Stelle bleiben, an der die Adresse steht.
+`BREVO_SEND_CONFIRMATION` bleibt ebenfalls leer — gegen die Bestätigungsmail an
+den Absender wurde entschieden.
 
 ### Checkliste beim ersten Deploy
 
@@ -261,8 +274,9 @@ Bestätigungsmail an den Absender wurde entschieden.
    — steht sie falsch, zeigen alle absoluten URLs auf die falsche Domain.
 2. Domain verbinden, HTTPS erzwingen, `www` und Apex auf eine Variante
    umleiten (die kanonische Variante muss zu `company.site.url` passen).
-3. Die vier `EMAILJS_*`-Secrets setzen. Danach eine echte Testanfrage absenden
-   und prüfen, dass die Mail ankommt.
+3. `BREVO_API_KEY` als Secret und `BREVO_SENDER_EMAIL` setzen, Absenderdomain
+   in Brevo verifiziert. Danach eine echte Testanfrage absenden und prüfen, dass
+   die Mail im **Posteingang** ankommt — nicht im Spam-Ordner.
 4. `/sitemap.xml` und `/robots.txt` im Browser prüfen, Sitemap in der Google
    Search Console einreichen.
 
@@ -274,7 +288,7 @@ sehen; `npm run dev` läuft weiter unter Node.
 
 `npm run deploy` deployt von der eigenen Maschine aus. **Nur als Notfallweg
 benutzen:** der Build backt vorhandene `.env*`-Dateien in das Worker-Bundle
-(`.open-next/cloudflare/next-env.mjs`), der EmailJS Private Key aus
+(`.open-next/cloudflare/next-env.mjs`), der Brevo-API-Key aus
 `.env.local` landet damit im deployten Code statt als Cloudflare-Secret. Der
 Build im Dashboard hat dieses Problem nicht, weil `.env.local` nicht im
 Repository liegt.
@@ -299,17 +313,24 @@ Analytics ergänzt, prüft vorher, ob damit ein Banner nötig wird — cookieles
 
 ### Blocker — ohne diese Punkte darf die Seite nicht online
 
-- [ ] **EmailJS einrichten** — Dashboard, zwei Vorlagen, fünf
-      Umgebungsvariablen. Anleitung: [`docs/emailjs.md`](./docs/emailjs.md).
+- [ ] **Brevo einrichten** — API-Key erzeugen, Absender verifizieren, zwei
+      Umgebungsvariablen setzen. Anleitung: [`docs/brevo.md`](./docs/brevo.md).
       Der Code ist fertig; ohne die Einrichtung antwortet das Formular mit
       einer Fehlermeldung und es geht keine Anfrage verloren, aber es kommt
       auch keine an.
-- [ ] **AV-Vertrag mit EmailJS** abschließen (Art. 28 DSGVO) und Firmierung
-      samt Sitz in die Datenschutzerklärung übernehmen, Abschnitte 06 und 07.
-      Ohne AVV darf der Dienst nicht produktiv laufen.
-- [ ] **Kontingent bei EmailJS prüfen.** Jede Anfrage verbraucht zwei
-      Sendungen; der kostenlose Tarif reicht für etwa 100 Anfragen im Monat.
-      Ist es erschöpft, sieht der Besucher die Fehlermeldung.
+- [ ] **SPF, DKIM und DMARC für die Absenderdomain setzen.** Eigener Punkt, weil
+      er anders fehlschlägt als alles andere: ein nicht verifizierter Absender
+      wird von Brevo abgelehnt und ist sofort sichtbar — ein verifizierter, aber
+      nicht signierter wird zugestellt und landet im Spam. Dann meldet das
+      Formular Erfolg und die Anfrage ist trotzdem weg.
+- [ ] **AV-Vertrag mit Brevo** abschließen (Art. 28 DSGVO) und danach
+      Vertragsentität, Anschrift und Verarbeitungsort in die
+      Datenschutzerklärung übernehmen, Abschnitte 06 und 07. Dort stehen
+      bewusst `<Pending>`-Platzhalter statt Vermutungen. Ohne AVV darf der
+      Dienst nicht produktiv laufen.
+- [ ] **Kontingent bei Brevo prüfen.** Eine Anfrage verbraucht eine Sendung;
+      der kostenlose Tarif erlaubt eine feste Zahl pro Tag (bei Einrichtung
+      300). Ist es erschöpft, sieht der Besucher die Fehlermeldung.
 - [ ] **Leistungskatalog vom Kunden bestätigen** (`src/content/services.ts`).
       Der aktuelle Katalog ist ein Vorschlag. Eine beworbene Leistung, die nicht
       angeboten wird, ist ein Problem nach § 5 UWG.

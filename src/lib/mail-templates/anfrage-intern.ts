@@ -1,29 +1,27 @@
-<!DOCTYPE html>
-<!--
-  EmailJS-Vorlage 1 von 2 — INTERNE BENACHRICHTIGUNG (Pflicht)
-  Env-Var: EMAILJS_TEMPLATE_ID_NOTIFICATION
-  Empfänger: info@imperial-gmbh.com (feste Adresse, im Dashboard eintragen)
+/**
+ * HTML body of the internal notification — the mail that carries the lead to
+ * info@imperial-gmbh.com.
+ *
+ * GENERATED-BY-HAND-ONCE, then maintained here. This file used to live in
+ * `docs/email-templates/anfrage-intern.html` and be pasted into a provider
+ * dashboard. It does not any more: Brevo is called with `htmlContent`, so the
+ * markup travels with the request and this file is the only copy that exists.
+ * Edit it here, and the next send uses it — no dashboard step, nothing to
+ * forget, and the template is reviewable in a diff like the rest of the code.
+ *
+ * Placeholders are `{{snake_case}}` and are filled by `renderMailTemplate`
+ * from `NotificationParams` (`src/lib/quote-mail.ts`). Every value is
+ * HTML-escaped on the way in — the name and the message are text a stranger
+ * typed, and this is the boundary where that stops mattering. Renaming a
+ * parameter without renaming it here throws at send time rather than silently
+ * shipping a mail with a blank row.
+ *
+ * Why table layout and inline styles: Outlook renders with the Word engine and
+ * knows neither flexbox, grid nor external CSS. The `<style>` block in the head
+ * is progressive enhancement for mobile clients only.
+ */
 
-  Gebaut für NotificationParams aus src/lib/quote-mail.ts. Diese Vorlage
-  interpoliert ausschließlich diese Variablen:
-
-    subject · reply_to · submitted_at · services_block · frequency
-    property_type · postal_code · location · size · customer_name
-    customer_company · customer_email · customer_phone · customer_message
-
-  Wird eine davon in quote-mail.ts umbenannt, bleibt hier eine Zeile leer.
-  Es gibt keine Firmenangabe in dieser Datei: die Mail geht an die Firma
-  selbst, sie muss sich nichts über sich erzählen (CLAUDE.md 2).
-
-  Diese Mail ist ein Arbeitsdokument, keine Marketingfläche. Sie wird auf dem
-  Telefon gelesen, meistens im Gehen, und sie hat genau eine Aufgabe: den Lead
-  in fünf Sekunden einordnen und zurueckrufen lassen. Deshalb stehen Telefon
-  und E-Mail als erstes und als größte Fläche, vor den Objektdaten.
-
-  Technisches: Tabellenlayout und Inline-Styles, weil Outlook mit der
-  Word-Engine rendert und kein Flexbox, Grid oder externes CSS kennt. Die
-  <style>-Regeln im Kopf sind reine Progressive Enhancement für Mobile.
--->
+export const INTERNAL_NOTIFICATION_HTML = `<!DOCTYPE html>
 <html lang="de" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="utf-8">
@@ -269,3 +267,4 @@
 
 </body>
 </html>
+`;
