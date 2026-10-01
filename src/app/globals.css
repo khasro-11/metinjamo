@@ -502,7 +502,7 @@
  * What this degrades to: the global base reset already zeroes the duration,
  * so the track does not travel. Removing the second copy and letting the
  * first one wrap turns the band into what it always was underneath, a
- * centred list of five links, and the stop control has nothing left to stop.
+ * centred list of six links, and the stop control has nothing left to stop.
  */
 /* Display face on the page's two heading levels, outside every cascade layer.
  *

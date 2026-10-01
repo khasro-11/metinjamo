@@ -15,9 +15,9 @@ import { absoluteUrl } from '@/config/company';
  * redirected in `next.config.ts` rather than listed here: a sitemap is a list
  * of canonical destinations, and a redirecting URL is not one.
  *
- * The five service categories are anchors on the landing page, not URLs. They
+ * The six service categories are anchors on the landing page, not URLs. They
  * are deliberately absent — `#gebaeudereinigung` is the same document as `/`,
- * and listing fragments would ask Google to index one page five times.
+ * and listing fragments would ask Google to index one page six times.
  *
  * TODO: add each remaining route here as it ships.
  */

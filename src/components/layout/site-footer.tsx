@@ -144,7 +144,7 @@ export function SiteFooter() {
             </ul>
           </nav>
 
-          {/* One link per category, not per individual service: eighteen rows
+          {/* One link per category, not per individual service: twenty-one rows
               here would be a sitemap dump. Each resolves to a bento tile
               anchor on the landing page (CLAUDE.md 7a). */}
           <nav aria-label="Leistungen" className="flex flex-col gap-5">

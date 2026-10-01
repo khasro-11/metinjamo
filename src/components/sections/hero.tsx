@@ -23,8 +23,8 @@ import { HeroCollage } from './hero-collage';
 const HEADLINE_LEAD = 'Gebäudepflege,';
 const HEADLINE_ACCENT = 'auf die Verlass ist.';
 
-/** 'Imperial Gebäude Service:' — the legal name without its legal form. */
-const INTRO = `${company.legalName.replace(/\s*GmbH$/, '')}:`;
+/** 'Imperial Gebäudeservice GmbH:' — the full legal name. */
+const INTRO = `${company.legalName}:`;
 
 /**
  * TODO (client): confirm this sentence and the three facts below it. They are

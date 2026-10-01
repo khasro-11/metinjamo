@@ -24,7 +24,11 @@
  */
 
 import { company, absoluteUrl } from '@/config/company';
-import { getServiceCategory, getServiceItem } from '@/content/services';
+import {
+  getServiceCategory,
+  getServiceItem,
+  hasSubServices,
+} from '@/content/services';
 import {
   frequencyLabel,
   hasValue,
@@ -82,8 +86,8 @@ function formatRegistry(): string {
  * The selected services, nested under their categories.
  *
  * Nesting rather than a flat list is the point: a category can be chosen
- * without any individual service (the form allows it on purpose), and eighteen
- * possible slugs printed in a row loses which of the five areas each one was
+ * without any individual service (the form allows it on purpose), and twenty-one
+ * possible slugs printed in a row loses which of the six areas each one was
  * picked under. The categories come out in catalogue order, not in the order
  * the visitor happened to tick them, so two requests are comparable at a
  * glance.
@@ -101,6 +105,10 @@ function formatServices(request: QuoteRequest): string {
         // Read from the category rather than from the submitted order, so the
         // nesting follows the catalogue the client approved.
         .filter((item) => category.items.some((own) => own.slug === item.slug));
+
+      // A single-service category is complete as it is; a "none selected"
+      // line under it would read as a missing answer.
+      if (!hasSubServices(category)) return category.category;
 
       const lines =
         picked.length > 0

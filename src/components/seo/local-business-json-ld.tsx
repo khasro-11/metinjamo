@@ -40,9 +40,9 @@ import { BUSINESS_ID, WEBSITE_ID, serviceNodeId } from './schema';
  *
  * ## Shape of the offer catalogue
  *
- * Five `Service` nodes, one per category, each listing its individual services
- * as an `OfferCatalog` of its own (CLAUDE.md 7a). The alternative — eighteen
- * flat `Service` nodes — would describe the business as eighteen unrelated
+ * Six `Service` nodes, one per category, each listing its individual services
+ * as an `OfferCatalog` of its own (CLAUDE.md 7a). The alternative — twenty-one
+ * flat `Service` nodes — would describe the business as twenty-one unrelated
  * offerings and would not match the page, where the individual services only
  * ever appear inside their category. `hasOfferCatalog` nests, so the two-level
  * catalogue survives into the graph instead of being flattened out of it.

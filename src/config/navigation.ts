@@ -21,7 +21,7 @@
  *
  * TODO: build `/leistungen`, `/ueber-uns` and `/kontakt` as real routes, then
  * move those entries back to the URLs. There are deliberately no per-service
- * detail routes: the catalogue is five categories, each an anchor on the
+ * detail routes: the catalogue is six categories, each an anchor on the
  * landing page (CLAUDE.md 7a).
  */
 
@@ -47,8 +47,8 @@ export const primaryNav: readonly NavLink[] = [
  * second time, so footer, hero chips and the Leistungen bento cannot drift
  * apart. The short names are used because these are tight rows.
  *
- * One entry per category, never per individual service: eighteen links in a
- * footer column is a sitemap dump, and the five categories are the addressable
+ * One entry per category, never per individual service: twenty-one links in a
+ * footer column is a sitemap dump, and the six categories are the addressable
  * units of the catalogue anyway.
  *
  * Every entry resolves to a bento tile's anchor on the landing page. The

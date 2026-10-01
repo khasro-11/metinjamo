@@ -18,6 +18,7 @@ import {
   getCategoryOfItem,
   getServiceCategory,
   getServiceItem,
+  hasSubServices,
   serviceCategories,
 } from '@/content/services';
 import { cn } from '@/lib/cn';
@@ -128,7 +129,7 @@ function ChoiceGrid({
  * exactly their own height with no dead space and no clipping. Motion animates
  * this off the main thread and reads the target height itself, which is the
  * one case where animating a layout property is the correct trade: the
- * alternative is a hardcoded maximum that is wrong for four of the five
+ * alternative is a hardcoded maximum that is wrong for most of the
  * categories.
  *
  * `aria-hidden` is deliberately absent. The wrapper is unmounted when the
@@ -210,10 +211,10 @@ function CategoryServices({
 }
 
 /**
- * Step one, in two stages: the five categories first, and the individual
+ * Step one, in two stages: the six categories first, and the individual
  * services of a category once that category is selected (CLAUDE.md 7a).
  *
- * Eighteen checkboxes in one flat list was the alternative and is the wrong
+ * Twenty-one checkboxes in one flat list was the alternative and is the wrong
  * shape for the first thing the form asks. It is a wall, it hides the
  * structure the rest of the site teaches, and it makes the cheapest possible
  * answer ("Gebäudereinigung") cost four clicks.
@@ -276,16 +277,27 @@ export function StepServices({ step, headingRef }: StepBodyProps) {
             <div
               key={category.slug}
               // Gebäudereinigung is the core business and leads the catalogue,
-              // so it takes the full row rather than sharing one. That also
-              // turns five cards into six cells: three even rows instead of a
-              // four-plus-one orphan, and an asymmetry that echoes the bento.
-              className={index === 0 ? 'sm:col-span-2' : undefined}
+              // so it takes the full row rather than sharing one, and
+              // Hausmeisterservice, the wrapper the others are bought through,
+              // closes on a full row too. Six cards in eight cells: no orphan,
+              // and an asymmetry that echoes the bento.
+              className={
+                index === 0 || index === serviceCategories.length - 1
+                  ? 'sm:col-span-2'
+                  : undefined
+              }
             >
               <ChoiceCard
                 type="checkbox"
                 value={category.slug}
                 label={category.category}
-                hint={`${category.items.length} Leistungen`}
+                // A single-service category has nothing to refine, so it gets
+                // neither a count nor a sub-list.
+                hint={
+                  hasSubServices(category)
+                    ? `${category.items.length} Leistungen`
+                    : undefined
+                }
                 {...register('serviceCategories', {
                   onChange: (event) =>
                     handleCategoryToggle(
@@ -296,7 +308,9 @@ export function StepServices({ step, headingRef }: StepBodyProps) {
               />
 
               <AnimatePresence initial={false}>
-                {isOpen ? <CategoryServices category={category} /> : null}
+                {isOpen && hasSubServices(category) ? (
+                  <CategoryServices category={category} />
+                ) : null}
               </AnimatePresence>
             </div>
           );

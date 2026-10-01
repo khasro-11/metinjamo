@@ -1,5 +1,6 @@
 import type { Icon } from '@phosphor-icons/react/dist/lib/types';
 import { BroomIcon } from '@phosphor-icons/react/dist/ssr/Broom';
+import { FireIcon } from '@phosphor-icons/react/dist/ssr/Fire';
 import { HammerIcon } from '@phosphor-icons/react/dist/ssr/Hammer';
 import { PlantIcon } from '@phosphor-icons/react/dist/ssr/Plant';
 import { ToolboxIcon } from '@phosphor-icons/react/dist/ssr/Toolbox';
@@ -12,13 +13,13 @@ import type {
   ServiceCategoryItem,
   ServiceCategorySlug,
 } from '@/content/services';
-import { serviceCategories } from '@/content/services';
+import { hasSubServices, serviceCategories } from '@/content/services';
 import { cn } from '@/lib/cn';
 
 /**
  * Icons live here, not in `content/services.ts`: they are presentation, and
  * keeping them out of the data module means the client-side quote form can
- * import the catalogue without pulling five Phosphor modules into its bundle.
+ * import the catalogue without pulling six Phosphor modules into its bundle.
  *
  * Typed as a total record over `ServiceCategorySlug`, so adding a category to
  * the catalogue is a compile error until it has an icon.
@@ -28,9 +29,25 @@ import { cn } from '@/lib/cn';
 const CATEGORY_ICONS: Record<ServiceCategorySlug, Icon> = {
   gebaeudereinigung: BroomIcon,
   'abbruch-sanierung': HammerIcon,
+  brandschadensanierung: FireIcon,
   'entruempelung-logistik': TruckIcon,
   aussenbereich: PlantIcon,
   hausmeisterservice: ToolboxIcon,
+};
+
+/**
+ * Where a category title may break, for titles too long for their tile.
+ *
+ * "Brandschadensanierung" is one 21-letter word, wider than a two-column tile
+ * at lg. Hyphenation is only switched on below md (globals.css), so above it
+ * the `overflow-wrap` floor chopped the word at its last letter. A soft hyphen
+ * at the compound seam breaks it as "Brandschaden- / sanierung" and stays
+ * invisible whenever the word fits. Kept here rather than in the catalogue:
+ * the name travels into JSON-LD, the form and the mail, which must not carry
+ * a U+00AD.
+ */
+const TITLE_BREAKS: Partial<Record<ServiceCategorySlug, string>> = {
+  brandschadensanierung: 'Brandschaden\u00ADsanierung',
 };
 
 /**
@@ -41,7 +58,7 @@ const CATEGORY_ICONS: Record<ServiceCategorySlug, Icon> = {
  * - `flagship` the largest tile. Wide photograph, copy in a full-width block.
  * - `column`   a tall tile; upright photograph, chips as a vertical list.
  * - `standard` the two-column default.
- * - `wide`     a full-row band, photograph as an upright panel on the left.
+ * - `wide`     a four-column band, photograph as an upright panel on the left.
  */
 type TileLayout = 'flagship' | 'column' | 'standard' | 'wide';
 
@@ -76,29 +93,30 @@ interface TileConfig {
 }
 
 /**
- * The bento: five unequal tiles on a six-column field, one per category.
+ * The bento: six unequal tiles on a six-column field, one per category.
  *
  *   lg                              md
  *   +-----------------+-------+     +---------+
  *   |                 |       |     |    A    |
  *   |   A  Reinigung  |   B   |     +---------+
  *   |      (4 x 2)    | Abbr. |     |    B    |
- *   |                 | (2x3) |     +----+----+
- *   +--------+--------+       |     | C  | D  |
- *   |   C    |   D    |       |     +----+----+
- *   +--------+--------+-------+     |    E    |
- *   |      E  Hausmeister     |     +---------+
- *   +-------------------------+
+ *   |                 | (2x3) |     +---------+
+ *   +--------+--------+       |     |    F    |
+ *   | F Brand|   C    |       |     +----+----+
+ *   +--------+--------+-------+     | C  | D  |
+ *   |   D    |  E  Hausmeister|     +----+----+
+ *   +--------+----------------+     |    E    |
+ *                                   +---------+
  *
  * Every row sums to six at `lg` and to two at `md`, so no orphan cell is ever
- * left over: A and B fill rows one and two, row three is C plus D plus B's
- * third row, and E closes the field. Auto-placement produces exactly this from
+ * left over: A and B fill rows one and two, row three is F plus C plus B's
+ * third row, and D plus the four-column E close the field. Auto-placement produces exactly this from
  * catalogue order, which is fixed by the client and must not be reordered for
  * layout reasons — so the layout was chosen to fit the order instead.
  *
  * Sizes follow the brief: Gebäudereinigung is the largest tile because it is
  * the core business and the thing the logo depicts, and Abbruch & Sanierung is
- * the tall one because six individual services do not fit in a short tile.
+ * the tall one because nine individual services do not fit in a short tile.
  *
  * Since every tile now carries a photograph, size is the *only* thing left
  * ranking them. There is no longer a light/dark split to lean on, so the
@@ -124,15 +142,23 @@ const TILES: Record<ServiceCategorySlug, TileConfig> = {
     sizes:
       '(min-width: 1024px) 360px, (min-width: 768px) calc(100vw - 5rem), calc(100vw - 3rem)',
   },
-  'entruempelung-logistik': {
+  brandschadensanierung: {
     accent: 'lilac',
+    // Full row at md, so the row below it can hold C and D as a pair.
+    span: 'md:col-span-2 lg:col-span-2',
+    layout: 'standard',
+    sizes:
+      '(min-width: 1024px) 364px, (min-width: 768px) calc(100vw - 5rem), calc(100vw - 3rem)',
+  },
+  'entruempelung-logistik': {
+    accent: 'sky',
     span: 'lg:col-span-2',
     layout: 'standard',
     sizes:
       '(min-width: 1024px) 364px, (min-width: 768px) calc(50vw - 3.125rem), calc(100vw - 3rem)',
   },
   aussenbereich: {
-    accent: 'sky',
+    accent: 'dark',
     span: 'lg:col-span-2',
     layout: 'standard',
     sizes:
@@ -140,7 +166,7 @@ const TILES: Record<ServiceCategorySlug, TileConfig> = {
   },
   hausmeisterservice: {
     accent: 'lilac',
-    span: 'md:col-span-2 lg:col-span-6',
+    span: 'md:col-span-2 lg:col-span-4',
     layout: 'wide',
     // The one photograph that is not full tile width at lg: there it is an
     // upright panel beside the copy, at 304px. Below lg the tile stacks and
@@ -220,6 +246,10 @@ function ServiceChips({
   // has the vertical room precisely because it is tall.
   const stacked = layout === 'column';
 
+  // A category whose only service is itself gets no chip: it would repeat
+  // the heading directly above it.
+  if (!hasSubServices(category)) return null;
+
   return (
     <ul
       aria-labelledby={`${category.slug}-titel`}
@@ -247,7 +277,7 @@ function ServiceChips({
  * Nothing sits on top of it and nothing is done to it. No scrim, no wash, no
  * gradient, and since this pass no grade either: the section's colour comes
  * from the tiles and the icon badges, the way the hero's comes from the
- * capsule rims. The brand duotone that used to run over these five pictures
+ * capsule rims. The brand duotone that used to run over these pictures
  * was mixed from the old blues and, once the palette moved to navy, read as a
  * cold film rather than as a grade.
  *
@@ -276,7 +306,7 @@ function CategoryPhoto({
         fill
         sizes={sizes}
         // No `priority`: the section sits well below the fold on every
-        // viewport, and five eager photographs would compete with the hero's
+        // viewport, and six eager photographs would compete with the hero's
         // own LCP candidate for bandwidth.
         className={cn(
           'object-cover',
@@ -296,7 +326,7 @@ function CategoryPhoto({
  * One category tile: a photograph and a copy block, in two separate zones.
  *
  * The separation is the whole design, and it is not a stylistic preference.
- * All five photographs carry large near-white regions — the render facade, the
+ * All the photographs carry large near-white regions — the render facade, the
  * concrete, the sunlit grass, the shirt, the lobby floor — and after the grade
  * above those regions stay bright, because the grade deliberately does not
  * crush them. Type laid over a photograph would have to survive the brightest
@@ -340,7 +370,7 @@ function CategoryTile({
         layout === 'standard' && 'text-title-sm md:text-title-md',
       )}
     >
-      {category.category}
+      {TITLE_BREAKS[category.slug] ?? category.category}
     </h3>
   );
 
@@ -381,17 +411,14 @@ function CategoryTile({
           className={cn(
             'flex',
             COPY_GROWTH[layout],
-            isWide
-              ? 'flex-col gap-6 lg:flex-row lg:items-start lg:gap-10'
-              : 'flex-col',
+            'flex-col',
             COPY_PADDING[layout],
           )}
         >
-          {/* 18rem, not 15: "Hausmeisterservice" is a single 18-character
-              word and at title-md it needs about 17rem to stay whole. A
-              narrower column broke it across a line as "Hausmeisterservic /
-              e", which no hyphenation setting can rescue. */}
-          <div className={cn(isWide && 'lg:w-[18rem] lg:shrink-0')}>
+          {/* Heading above the blurb on every layout. The wide tile once set
+              them side by side across six columns; at four columns that left
+              the blurb a strip under 100px wide. */}
+          <div>
             <IconBadge
               size={isFlagship || isColumn ? 'xl' : 'lg'}
               tone={accent}
@@ -405,12 +432,12 @@ function CategoryTile({
             {heading}
           </div>
 
-          <div className={cn('flex flex-col', isWide ? 'lg:flex-1' : 'flex-1')}>
+          <div className="flex flex-1 flex-col">
             <p
               className={cn(
                 'max-w-copy text-neutral-700',
                 isFlagship ? 'text-body' : 'text-body-sm',
-                isWide ? 'mt-0 lg:mt-0' : 'mt-4',
+                'mt-4',
               )}
             >
               {category.blurb}
@@ -431,7 +458,7 @@ function CategoryTile({
 /**
  * Leistungen — Asymmetrical Bento, Soft Structuralism.
  *
- * Five tiles in four sizes, one per category (CLAUDE.md 7a). Eighteen
+ * Six tiles in four sizes, one per category (CLAUDE.md 7a). Twenty-one
  * equally-sized tiles, one per individual service, was the obvious reading of
  * the catalogue and is the wrong one: it is unreadable, it flattens the
  * hierarchy the client's own ordering encodes, and it would put
@@ -443,7 +470,7 @@ function CategoryTile({
  * purpose: three equal cards in a row is the templated default this section
  * exists to avoid (CLAUDE.md 5.7).
  *
- * The section ground is sand-100, not brand-050 (CLAUDE.md 5.9). Five
+ * The section ground is sand-100, not brand-050 (CLAUDE.md 5.9). Six
  * dark-blue photographic tiles on a blue ground merge into one field, and this
  * section sits directly above the full-bleed brand-900 anchor in Ablauf; the
  * warm ground is what keeps the two apart. sand-100 carries ink at 15.01:1 and
@@ -486,7 +513,7 @@ export function ServicesBento() {
             {/* TODO (client): confirm that services can in fact be combined
                 into one contract before this sentence goes live. */}
             <p className="max-w-copy text-body text-neutral-700">
-              Fünf Bereiche, achtzehn Leistungen. Sie beauftragen einzelne davon
+              Sechs Bereiche, einundzwanzig Leistungen. Sie beauftragen einzelne davon
               oder legen mehrere in einen Vertrag — in beiden Fällen bleibt es
               bei einem Ansprechpartner für das ganze Objekt.
             </p>

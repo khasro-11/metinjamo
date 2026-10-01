@@ -302,12 +302,13 @@ Hosting      Cloudflare Pages (kostenlos, kommerzielle Nutzung erlaubt)
 
 ## 7a. Leistungskatalog (verbindlich)
 
-Fünf Kategorien, 18 Einzelleistungen. Gehört als typisiertes Array nach `src/content/services.ts` und wird von Bento, Hero-Chips, Formular und JSON-LD von dort bezogen. **Keine Unterseiten je Leistung.**
+Sechs Kategorien, 21 Einzelleistungen. Gehört als typisiertes Array nach `src/content/services.ts` und wird von Bento, Hero-Chips, Formular und JSON-LD von dort bezogen. **Keine Unterseiten je Leistung.**
 
 | Kategorie                   | Anker                     | Einzelleistungen                                                                                              |
 | --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | **Gebäudereinigung**        | `#gebaeudereinigung`      | Glas- und Fensterreinigung · Unterhaltsreinigung · Grundreinigung · Baureinigung                              |
-| **Abbruch & Sanierung**     | `#abbruch-sanierung`      | Gebäudesanierung · Entkernung · Wasserschadensanierung · Trockenlegung · Trockenbauarbeiten · Fliesenarbeiten |
+| **Abbruch & Sanierung**     | `#abbruch-sanierung`      | Rückbau · Gebäudesanierung · Entkernung · Wasserschadensanierung · Schadstoffsanierung · Trockenlegung · Trockenbauarbeiten · Fliesenarbeiten |
+| **Brandschadensanierung**   | `#brandschadensanierung`  | Brandschadensanierung (eigene Kategorie auf Kundenwunsch, ohne Unterleistungen) |
 | **Entrümpelung & Logistik** | `#entruempelung-logistik` | Durchführung von Umzügen · Entrümpelung · Sperrmüllentsorgung                                                 |
 | **Außenbereich & Gelände**  | `#aussenbereich`          | Garten- und Landschaftsbau · Grünpflege · Winterdienst (Räum- und Streupflicht)                               |
 | **Hausmeisterservice**      | `#hausmeisterservice`     | Technische Immobilienbetreuung · Allgemeine Objektbetreuung                                                   |
@@ -318,7 +319,7 @@ Fünf Kategorien, 18 Einzelleistungen. Gehört als typisiertes Array nach `src/c
 
 - „Winterdienst" immer mit dem Zusatz „Räum- und Streupflicht" — das ist für Hausverwaltungen das Kaufargument, weil sie damit eine gesetzliche Pflicht auslagern.
 - Wasserschadensanierung ist die inhaltliche Klammer zum Akutfall-Hinweis aus Abschnitt 2. Beides zusammen denken.
-- Bei Abbruch, Sanierung und Trockenbau keine Aussagen zu Zertifikaten, Meisterbrief oder Schadstoffsanierung (Asbest, KMF) treffen, solange das nicht belegt ist. Das ist ein rechtlich sensibler Bereich.
+- Schadstoffsanierung: Laut Kunde liegt eine behördliche Zulassung nach § 11 Abs. 3 GefStoffV vor. Genau das darf gesagt werden — einmal, im Blurb der Kategorie. Keine Aufzählung einzelner Schadstoffe, kein „alle Arten von Schadstoffen“, keine weiteren Zertifikate oder Meisterbrief, solange das nicht belegt ist. Rechtlich sensibler Bereich (§ 5 UWG).
 
 ---
 
@@ -404,7 +405,7 @@ Fünf Kategorien, 18 Einzelleistungen. Gehört als typisiertes Array nach `src/c
 ## 12. Offene Punkte (vom Kunden zu liefern)
 
 - [x] ~~Leistungskatalog~~ — erledigt, siehe Abschnitt 7a
-- [ ] Für Abbruch/Sanierung: liegen Nachweise, Zertifikate oder ein Meisterbetrieb vor? Falls ja, gehört das prominent auf die Seite. Falls nein, keine entsprechenden Aussagen treffen.
+- [ ] Zulassungsbescheid nach § 11 Abs. 3 GefStoffV als Kopie (Behörde, Datum, Umfang) — Zitat gegen den Bescheid prüfen. Meisterbetrieb oder weitere Nachweise für Abbruch/Sanierung? Falls nein, keine entsprechenden Aussagen treffen.
 - [x] ~~Logo als SVG~~ — erledigt, Logo- und Favicon-Set liegen vor
 - [ ] Mitarbeiterzahl
 - [ ] **Bezugspunkt der „über 6 Jahre" klären** — GmbH oder Vorgängerbetrieb? Falls die GmbH jünger ist, „über 6 Jahre Erfahrung im Gebäudeservice" formulieren, nicht „die GmbH besteht seit 6 Jahren". Geschäftskunden prüfen den Handelsregisterauszug.

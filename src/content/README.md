@@ -3,7 +3,7 @@
 Editorial content as typed TS modules, kept out of the components so copy can
 be reviewed without touching markup.
 
-- `services.ts` — the service catalogue: five categories holding eighteen
+- `services.ts` — the service catalogue: six categories holding twenty-one
   individual services (CLAUDE.md 7a). Single source of truth for the footer
   column, the hero chips, the Leistungen bento, the quote form and the JSON-LD
   offer catalogue. Pure data, no React: presentation (icons, bento tile sizes)

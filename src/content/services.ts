@@ -8,15 +8,21 @@
  *
  * ## Two levels, on purpose
  *
- * The catalogue is five categories holding eighteen individual services. That
- * shape is the content, not a convenience: eighteen equally-weighted entries
- * is an unreadable bento and an unanswerable first form step, while five
+ * The catalogue is six categories holding twenty-one individual services.
+ * That shape is the content, not a convenience: twenty-one equally-weighted entries
+ * is an unreadable bento and an unanswerable first form step, while six
  * categories is a decision a visitor can actually make in one glance. The
  * individual services are what proves the category is real, so they are always
  * shown *inside* their category and never on their own.
  *
+ * The one exception is `brandschadensanierung`, a category holding a single
+ * service of the same name. The client wants fire damage presented as its own
+ * area rather than as one chip among nine in Abbruch & Sanierung. Surfaces
+ * that list a category's services skip the list when it would only repeat
+ * the category name (see `hasSubServices`).
+ *
  * There are no per-service pages. Every category lives on the landing page and
- * on `/leistungen`, reachable through its own anchor (CLAUDE.md 9). Eighteen
+ * on `/leistungen`, reachable through its own anchor (CLAUDE.md 9). Twenty-one
  * thin detail pages would be duplicate content in the sense Google means it.
  *
  * Deliberately free of React: the quote form is a client component, and an
@@ -32,11 +38,12 @@
  *   For a Hausverwaltung that phrase is the entire buying argument, because it
  *   is the statutory duty they are outsourcing. It is part of the name, not a
  *   footnote, so it cannot be dropped by a surface that only renders names.
- * - Nothing in `abbruch-sanierung` claims a certificate, a Meisterbrief or
- *   hazardous-material clearance (asbestos, KMF). None of that is evidenced,
- *   and in this trade an unbacked claim is a section 5 UWG problem, not a copy
- *   problem. The blurb therefore describes coordination and sequencing, which
- *   is true and is also what a Verwalter is actually buying.
+ * - The only qualification `abbruch-sanierung` claims is the authority
+ *   approval for hazardous-substance work under § 11 Abs. 3 GefStoffV, which
+ *   the client has confirmed. It is stated once, in the blurb, and nowhere
+ *   else: no list of substances, no Meisterbrief, no further certificates.
+ *   In this trade an unbacked claim is a section 5 UWG problem, not a copy
+ *   problem, so anything beyond that approval needs evidence first.
  * - No figures, no superlatives, no "24/7", no "deutschlandweit".
  */
 
@@ -44,6 +51,7 @@
 export type ServiceCategorySlug =
   | 'gebaeudereinigung'
   | 'abbruch-sanierung'
+  | 'brandschadensanierung'
   | 'entruempelung-logistik'
   | 'aussenbereich'
   | 'hausmeisterservice';
@@ -103,7 +111,9 @@ export interface ServiceCategory {
  * Order is fixed by the client and is not alphabetical (CLAUDE.md 7a).
  * Gebäudereinigung leads because it is the core business and the thing the
  * logo depicts; Hausmeisterservice closes because it is the wrapper the other
- * four are bought through once a Verwalter has more than one object.
+ * five are bought through once a Verwalter has more than one object.
+ * Brandschadensanierung follows Abbruch & Sanierung, the area it was split
+ * out of.
  */
 export const serviceCategories = [
   {
@@ -132,10 +142,12 @@ export const serviceCategories = [
     category: 'Abbruch & Sanierung',
     shortName: 'Abbruch & Sanierung',
     anchor: 'abbruch-sanierung',
-    // Coordination, sequencing and a single point of contact. No claim about
-    // qualifications, and none about hazardous materials — see the header.
+    // Coordination, sequencing and a single point of contact, plus the one
+    // qualification the client has confirmed — see the header.
+    // TODO (client): send a copy of the GefStoffV approval (issuing authority,
+    // date, scope) and confirm the exact citation before this goes live.
     blurb:
-      'Vom Rückbau bis zur fertigen Fläche aus einer Hand. Sie koordinieren nicht vier Gewerke nacheinander, sondern haben einen Ansprechpartner, der die Reihenfolge kennt und die Übergaben verantwortet.',
+      'Vom Rückbau bis zur fertigen Fläche aus einer Hand. Sie koordinieren nicht vier Gewerke nacheinander, sondern haben einen Ansprechpartner, der die Reihenfolge kennt und die Übergaben verantwortet. Für Schadstoffsanierungen sind wir nach § 11 Abs. 3 GefStoffV behördlich zugelassen.',
     image: {
       src: '/images/abbruch.jpeg',
       alt: 'Bauarbeiter in Warnschutzhose steht auf einer aufgebrochenen Betondecke mit freiliegender Bewehrung.',
@@ -145,13 +157,36 @@ export const serviceCategories = [
       position: '70% 60%',
     },
     items: [
+      { slug: 'rueckbau', name: 'Rückbau' },
       { slug: 'gebaeudesanierung', name: 'Gebäudesanierung' },
       { slug: 'entkernung', name: 'Entkernung' },
       { slug: 'wasserschadensanierung', name: 'Wasserschadensanierung' },
+      { slug: 'schadstoffsanierung', name: 'Schadstoffsanierung' },
       { slug: 'trockenlegung', name: 'Trockenlegung' },
       { slug: 'trockenbauarbeiten', name: 'Trockenbauarbeiten' },
       { slug: 'fliesenarbeiten', name: 'Fliesenarbeiten' },
     ],
+  },
+  {
+    slug: 'brandschadensanierung',
+    category: 'Brandschadensanierung',
+    shortName: 'Brandschaden',
+    anchor: 'brandschadensanierung',
+    // Describes the sequence, not a qualification and not an emergency
+    // promise: the out-of-hours line covers Wasserschaden and Winterdienst
+    // only (CLAUDE.md 2), so nothing here says "sofort" or "rund um die Uhr".
+    // TODO (client): confirm this blurb describes the actual scope of work.
+    blurb:
+      'Nach einem Brand werden die betroffenen Bereiche gesichert, von Ruß und Brandrückständen befreit und für die Instandsetzung vorbereitet. Sie haben einen Ansprechpartner für den gesamten Ablauf, statt die einzelnen Schritte selbst zu koordinieren.',
+    image: {
+      // TODO (client): confirm the licence for this photograph.
+      src: '/images/brandschadensanierung.png',
+      alt: 'Zwei Mitarbeiter in Schutzanzügen und Atemschutzmasken entfernen Brandrückstände auf einer verrußten, mit Stahlstützen gesicherten Fläche.',
+      // The frame is very wide (2:1) and both workers stand right of centre.
+      // 60 % keeps the one in front and the one behind him in a 16:10 crop.
+      position: '60% 50%',
+    },
+    items: [{ slug: 'brandschadensanierung', name: 'Brandschadensanierung' }],
   },
   {
     slug: 'entruempelung-logistik',
@@ -286,6 +321,19 @@ export function categoryAnchorHref(
   { absolute = false }: { absolute?: boolean } = {},
 ): string {
   return `${absolute ? '/' : ''}#${slug}`;
+}
+
+/**
+ * Whether a category has individual services worth listing on their own.
+ *
+ * False for a category whose only service carries the category's own name.
+ * Listing it would print the heading a second time as a chip, a checkbox or
+ * a mail line.
+ */
+export function hasSubServices(category: ServiceCategoryItem): boolean {
+  return !(
+    category.items.length === 1 && category.items[0].name === category.category
+  );
 }
 
 /** Comma-joined service names of one category. Used in prose and in JSON-LD. */

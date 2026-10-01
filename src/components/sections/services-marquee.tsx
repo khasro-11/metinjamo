@@ -18,7 +18,7 @@ import { cn } from '@/lib/cn';
  * bar, and only then the warm ground of Leistungen. Navy here puts the break
  * back where the table wants it.
  *
- * Five links, from `serviceNav`, which reads `content/services.ts`. The order
+ * Six links, from `serviceNav`, which reads `content/services.ts`. The order
  * is the catalogue's and is not this component's to change (CLAUDE.md 7a).
  *
  * ## Why there is a stop button
@@ -31,7 +31,7 @@ import { cn } from '@/lib/cn';
  * JavaScript, and therefore no client boundary — see globals.css.
  *
  * Under `prefers-reduced-motion` the band does not animate at all and the
- * second copy is removed, so it degrades to a centred list of five links.
+ * second copy is removed, so it degrades to a centred list of six links.
  *
  * Server component.
  */

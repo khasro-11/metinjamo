@@ -46,13 +46,13 @@ export const faqItems: readonly FaqItem[] = [
     // visible copy, and a stale list here would put services into the search
     // result that the page no longer offers.
     //
-    // Category names only. Naming all eighteen individual services would make
+    // Category names only. Naming all twenty-one individual services would make
     // this the longest answer in the FAQ by a wide margin and bury the second
     // sentence, which is the one that actually answers what a Verwalter is
     // asking. The individual services are one scroll away, in the bento.
     answer: `${serviceCategories
       .map((category) => category.category)
-      .join(', ')}. Dahinter stehen achtzehn einzelne Leistungen, die Sie auf der Seite unter „Leistungen“ im Detail sehen. In den meisten Objekten ist es nicht eine einzelne davon, sondern eine Kombination aus zwei oder drei, die in einem gemeinsamen Leistungsverzeichnis zusammenlaufen.`,
+      .join(', ')}. Dahinter stehen einundzwanzig einzelne Leistungen, die Sie auf der Seite unter „Leistungen“ im Detail sehen. In den meisten Objekten ist es nicht eine einzelne davon, sondern eine Kombination aus zwei oder drei, die in einem gemeinsamen Leistungsverzeichnis zusammenlaufen.`,
   },
   {
     question: 'Können wir den Leistungsumfang auf unser Objekt zuschneiden?',
